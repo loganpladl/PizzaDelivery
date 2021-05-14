@@ -41,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     float animationBlendDelta = .1f;
 
+    bool enable = true;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -54,33 +56,37 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        Vertical = Input.GetAxisRaw("Vertical");
-
-        Horizontal = Input.GetAxisRaw("Horizontal");
-
-        horizontalAnimationBlend = Mathf.MoveTowards(horizontalAnimationBlend, Horizontal, animationBlendDelta * Time.deltaTime);
-        verticalAnimationBlend = Mathf.MoveTowards(verticalAnimationBlend, Vertical, animationBlendDelta * Time.deltaTime);
-
-        animator.SetFloat("Vertical", verticalAnimationBlend);
-        animator.SetFloat("Horizontal", horizontalAnimationBlend);
-
-        if (Input.GetButtonDown("Jump"))
+        if (enable)
         {
-            tryJump = true;
+            Vertical = Input.GetAxisRaw("Vertical");
+
+            Horizontal = Input.GetAxisRaw("Horizontal");
+
+            horizontalAnimationBlend = Mathf.MoveTowards(horizontalAnimationBlend, Horizontal, animationBlendDelta * Time.deltaTime);
+            verticalAnimationBlend = Mathf.MoveTowards(verticalAnimationBlend, Vertical, animationBlendDelta * Time.deltaTime);
+
+            animator.SetFloat("Vertical", verticalAnimationBlend);
+            animator.SetFloat("Horizontal", horizontalAnimationBlend);
+
+            if (Input.GetButtonDown("Jump"))
+            {
+                tryJump = true;
+            }
+
+            Vector3 moveDirection = (transform.right * Horizontal + transform.forward * Vertical);
+
+            moveDirection.Normalize();
+            targetVelocity = moveDirection * maxSpeed;
         }
-
-        Vector3 moveDirection = (transform.right * Horizontal + transform.forward * Vertical);
-
-        moveDirection.Normalize();
-        targetVelocity = moveDirection * maxSpeed;
-
-        
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        Move();
+        if (enable)
+        {
+            Move();
+        }
     }
 
     void Move()
@@ -109,5 +115,15 @@ public class PlayerMovement : MonoBehaviour
     private void OnCollisionStay(Collision collision)
     {
         grounded = true;
+    }
+
+    public void Enable()
+    {
+        enable = true;
+    }
+
+    public void Disable()
+    {
+        enable = false;
     }
 }
