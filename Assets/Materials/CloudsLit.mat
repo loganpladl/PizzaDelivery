@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CloudsLit
+  m_Shader: {fileID: -6465566751694194690, guid: 7bd14b130c220084f8149d6dc1343fac, type: 3}
+  m_ShaderKeywords: _RECEIVE_SHADOWS_OFF
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - Vector1_054facbd976c408cb4832608fd65b025: 0.2
+    - Vector1_0c1dbf3f53a04f7aac1885bc03ad017b: -1
+    - Vector1_2c986ba53d104f4b9a1ddb6e449eda50: 25
+    - Vector1_3dd16f8332db46108d65dd13ff21af27: 0.1
+    - Vector1_729b19a69fd74a51b3632b54c241484d: 30
+    - Vector1_915e4d64512e4962a9c4d08c1d82b895: 250
+    - Vector1_b4c1c355ca894390832531265b479d13: 2
+    - Vector1_c57f887ca2a547c39c261e4145d40be5: 0.01
+    - Vector1_c754877ed94348019a192f967097c32d: 5
+    - Vector1_c94ef8bb89ba4e0d86acc53ce6200534: 0.02
+    - Vector1_d3d49f1492c04b7a84f0efb4860dcb97: 100
+    - Vector1_e43bf4cf5aa74731a0886f2127910cd3: 10
+    - Vector1_e70624835fe24764a645ebb84d9b6eda: 2
+    - Vector1_f649f8d368024f678d932acfc5f5b68d: 2
+    m_Colors:
+    - Color_869b3b54191f469bb276c3cac3604c6c: {r: 0.88394445, g: 0.9386125, b: 0.9811321, a: 0}
+    - Color_cba6feb84eb247928f91920d73520d73: {r: 0.4488697, g: 0.6101461, b: 0.7264151, a: 0}
+    - Vector4_2d69fda7184f4404ae4a72b52130bc20: {r: 0, g: 1, b: -0.3, a: 2.7}
+    - Vector4_74269524fa444d5180a70b9a7cc294c8: {r: 1, g: 0, b: 0, a: 90}
+  m_BuildTextureStacks: []
