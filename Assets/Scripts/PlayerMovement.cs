@@ -26,8 +26,6 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody rigidBody;
 
     // For input
-    float Vertical = 0;
-    float Horizontal = 0;
     bool tryJump = false;
 
 
@@ -56,31 +54,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+
+    }
+
+    // Update movement to be done in next fixed update according to horizontal/vertical input
+    public void UpdateMove(float horizontal, float vertical)
+    {
         if (enable)
         {
-            Vertical = Input.GetAxisRaw("Vertical");
-
-            Horizontal = Input.GetAxisRaw("Horizontal");
-
-            horizontalAnimationBlend = Mathf.MoveTowards(horizontalAnimationBlend, Horizontal, animationBlendDelta * Time.deltaTime);
-            verticalAnimationBlend = Mathf.MoveTowards(verticalAnimationBlend, Vertical, animationBlendDelta * Time.deltaTime);
+            horizontalAnimationBlend = Mathf.MoveTowards(horizontalAnimationBlend, horizontal, animationBlendDelta * Time.deltaTime);
+            verticalAnimationBlend = Mathf.MoveTowards(verticalAnimationBlend, vertical, animationBlendDelta * Time.deltaTime);
 
             animator.SetFloat("Vertical", verticalAnimationBlend);
             animator.SetFloat("Horizontal", horizontalAnimationBlend);
+            animator.SetBool("Grounded", grounded);
 
-            if (Input.GetButtonDown("Jump"))
-            {
-                tryJump = true;
-            }
-
-            Vector3 moveDirection = (transform.right * Horizontal + transform.forward * Vertical);
+            Vector3 moveDirection = (transform.right * horizontal + transform.forward * vertical);
 
             moveDirection.Normalize();
             targetVelocity = moveDirection * maxSpeed;
         }
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
         if (enable)
@@ -102,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
         if (grounded && tryJump)
         {
             rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
+            animator.SetTrigger("Jumped");
         }
 
         // Manual gravity for more control
@@ -125,5 +121,10 @@ public class PlayerMovement : MonoBehaviour
     public void Disable()
     {
         enable = false;
+    }
+
+    public void TryJump()
+    {
+        tryJump = true;
     }
 }
