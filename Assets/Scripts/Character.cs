@@ -24,7 +24,7 @@ public class Character : MonoBehaviour
     MeshRenderer characterBackpackMesh;
 
     // Set by LevelState. Used to rewind correctly.
-    float rewindDuration;
+    float maxRewindDuration;
     int totalSteps;
     int currentStep = 0;
 
@@ -36,6 +36,9 @@ public class Character : MonoBehaviour
 
     LevelState levelState;
 
+    // Always revert to initial point at the end to ensure consistency
+    TimePoint initialPoint;
+
     private void Awake()
     {
         movementComponent = GetComponent<PlayerMovement>();
@@ -46,6 +49,8 @@ public class Character : MonoBehaviour
     void Start()
     {
         levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
+
+        initialPoint = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
     }
 
     // Update is called once per frame
@@ -77,20 +82,26 @@ public class Character : MonoBehaviour
         mouseLook.UpdateLook(mouseX, mouseY);
     }
 
-    public void StartRewind()
+    public void StartRewind(float rewindDuration)
     {
         //movementComponent.Disable();
         rigidbodyComponent.isKinematic = true;
         mouseLook.Disable();
         rewinding = true;
 
-        rewindTimer = 0;
+        rewindTimer = maxRewindDuration - rewindDuration;
 
         animatorComponent.StartPlayback();
     }
 
     public void StopRewind()
     {
+        // Return to initial time point for consistency
+        transform.position = initialPoint.position;
+        transform.rotation = initialPoint.rotation;
+        mouseLook.SetVerticalRotation(initialPoint.cameraVerticalRotation);
+
+
         //movementComponent.Enable();
         rigidbodyComponent.isKinematic = false;
         mouseLook.Enable();
@@ -103,8 +114,14 @@ public class Character : MonoBehaviour
 
     private void RewindStep()
     {
-        float frac = 1 - (rewindTimer / rewindDuration);
-        currentStep = (int)((totalSteps - 1) * frac);
+        float frac = 1 - (rewindTimer / maxRewindDuration);
+        
+        // TODO: Subtracting 1 to fix off by one error when rewinding. Should look for a better solution.
+        currentStep = (int)((totalSteps) * frac) - 1;
+
+        // TODO: is there a better way to avoid these index out of bounds errors?
+        if (currentStep >= totalSteps) currentStep = totalSteps - 1;
+        if (currentStep < 0) currentStep = 0;
 
         animatorComponent.playbackTime = frac * (animatorComponent.recorderStopTime - animatorComponent.recorderStartTime);
 
@@ -128,10 +145,16 @@ public class Character : MonoBehaviour
         }
     }
 
+    // Used by input manager when it runs out of commands to prevent continued movement/animations
+    public void StopMovementAndAnimations()
+    {
+        movementComponent.StopMovementAndAnimations();
+    }
+
     public void SetRewindParameters(int totalSteps, float rewindDuration)
     {
         this.totalSteps = totalSteps;
-        this.rewindDuration = rewindDuration;
+        this.maxRewindDuration = rewindDuration;
 
         timePoints = new TimePoint[totalSteps];
     }
@@ -189,10 +212,5 @@ public class Character : MonoBehaviour
                 levelState.EarlyRewind();
             }
         }
-    }
-
-    public void SetRewindDuration()
-    {
-        this.rewindDuration = rewindDuration;
     }
 }

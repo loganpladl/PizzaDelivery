@@ -57,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-
+        animator.SetBool("Grounded", grounded);
     }
 
     // Update movement to be done in next fixed update according to horizontal/vertical input
@@ -68,9 +68,9 @@ public class PlayerMovement : MonoBehaviour
             horizontalAnimationBlend = Mathf.MoveTowards(horizontalAnimationBlend, horizontal, animationBlendDelta * Time.deltaTime);
             verticalAnimationBlend = Mathf.MoveTowards(verticalAnimationBlend, vertical, animationBlendDelta * Time.deltaTime);
 
+            // TODO: do i need to do this in here or can I move it to Update()
             animator.SetFloat("Vertical", verticalAnimationBlend);
             animator.SetFloat("Horizontal", horizontalAnimationBlend);
-            animator.SetBool("Grounded", grounded);
 
             Vector3 moveDirection = (transform.right * horizontal + transform.forward * vertical);
 
@@ -119,6 +119,16 @@ public class PlayerMovement : MonoBehaviour
 
         grounded = false;
         tryJump = false;
+    }
+
+    // Used by input manager when it runs out of commands to prevent continued movement/animations
+    public void StopMovementAndAnimations()
+    {
+        targetVelocity = Vector3.zero;
+
+        animator.SetFloat("Vertical", 0);
+        animator.SetFloat("Horizontal", 0);
+        animator.SetBool("Grounded", grounded);
     }
 
     private void OnCollisionEnter(Collision collision)

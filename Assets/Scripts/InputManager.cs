@@ -26,6 +26,9 @@ public class InputManager : MonoBehaviour
     // Current command index for each list in the above dictionary. Reset to 0 at the beginning of each loop.
     int[] currentReplayIndices;
 
+    // Indicates whether the currentReplayIndices have reached the end of their respective lists.
+    bool[] reachedEnd;
+
     //private Command Horizontal, Vertical, Right, Forward, Back, Interact, Jump, Look, QuickRewind, Reset;
     // Start is called before the first frame update
     void Start()
@@ -66,6 +69,7 @@ public class InputManager : MonoBehaviour
         this.characters = characters;
         numUniverses = characters.Length;
         currentReplayIndices = new int[characters.Length];
+        reachedEnd = new bool[characters.Length];
 
         foreach (Character c in characters)
         {
@@ -82,6 +86,7 @@ public class InputManager : MonoBehaviour
         for (int i = 0; i < currentReplayIndices.Length; i++)
         {
             currentReplayIndices[i] = 0;
+            reachedEnd[i] = false;
         }
     }
 
@@ -146,16 +151,25 @@ public class InputManager : MonoBehaviour
                         break;
                     }
 
-                    // Execute this command and increment the replay index
-                    nextPair.Key.Execute();
-
-                    if (currentReplayIndices[i] == commands[currentCharacter].Count - 1)
+                    if (!reachedEnd[i])
                     {
-                        executing = false;
+                        nextPair.Key.Execute();
+
+                        // If we've reached the end of this command list
+                        if (currentReplayIndices[i] == commands[currentCharacter].Count - 1)
+                        {
+                            currentCharacter.StopMovementAndAnimations();
+                            reachedEnd[i] = true;
+                            break;
+                        }
+                        else
+                        {
+                            currentReplayIndices[i]++;
+                        }
                     }
                     else
                     {
-                        currentReplayIndices[i]++;
+                        break;
                     }
                 }
             }

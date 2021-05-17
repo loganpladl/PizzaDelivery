@@ -354,14 +354,9 @@ public class LevelState : MonoBehaviour
 
         rewinding = true;
 
-        int stepsToRewind = (int)(levelDuration-levelTimer * (1 / Time.fixedDeltaTime));
-        float rewindDuration = (levelDuration - levelTimer) / rewindSpeed;
-
         foreach (Character c in characters)
         {
-            //c.SetRewindDuration()
-            //c.StartRewind(stepsToRewind, rewindDuration);
-            c.StartRewind();
+            c.StartRewind(rewindTimer);
         }
         levelTimer = levelDuration;
     }
@@ -441,6 +436,7 @@ public class LevelState : MonoBehaviour
     // Rewind early if the player presses Q or falls out of bounds
     public void EarlyRewind()
     {
-
+        rewindTimer = (levelDuration - levelTimer) / rewindSpeed;
+        StartCoroutine(LoopEnd());
     }
 }
