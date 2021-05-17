@@ -41,6 +41,9 @@ public class PlayerMovement : MonoBehaviour
 
     bool enable = true;
 
+    bool onPlayerBackpack = false;
+    Vector3 belowPlayersVelocity;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -86,13 +89,23 @@ public class PlayerMovement : MonoBehaviour
 
     void Move()
     {
+        // Adjusted target velocity is used to add the velocity of a player we're standing on
+        Vector3 adjustedTargetVelocity = targetVelocity;
+        if (onPlayerBackpack)
+        {
+            //rigidBody.velocity = new Vector3(belowPlayersVelocity.x, rigidBody.velocity.y, belowPlayersVelocity.z);
+            adjustedTargetVelocity += belowPlayersVelocity;
+        }
+
         Vector3 newVelocity = rigidBody.velocity;
         float acceleration = grounded ? maxAcceleration : maxAirAcceleration;
         float maxSpeedDelta = acceleration * Time.deltaTime;
 
-        newVelocity.x = Mathf.MoveTowards(newVelocity.x, targetVelocity.x, maxSpeedDelta);
-        newVelocity.z = Mathf.MoveTowards(newVelocity.z, targetVelocity.z, maxSpeedDelta);
+        newVelocity.x = Mathf.MoveTowards(newVelocity.x, adjustedTargetVelocity.x, maxSpeedDelta);
+        newVelocity.z = Mathf.MoveTowards(newVelocity.z, adjustedTargetVelocity.z, maxSpeedDelta);
         rigidBody.velocity = newVelocity;
+
+        
 
         if (grounded && tryJump)
         {
@@ -108,14 +121,62 @@ public class PlayerMovement : MonoBehaviour
         tryJump = false;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        EvaluateGroundCollision(collision);
+
+        if (collision.collider.CompareTag("BackpackFloor"))
+        {
+            // TODO: This is triggering when players just bump into each other for some reason.
+            // I'll try fixing it by checking the normal, but this shouldn't be necessary.
+            // Also should maybe switch these to triggers and just use the backpack for collision
+            Vector3 normal = collision.GetContact(0).normal;
+            if (normal.y >= 0.9f)
+            {
+                onPlayerBackpack = true;
+                belowPlayersVelocity = collision.rigidbody.velocity;
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.CompareTag("BackpackFloor"))
+        {
+            onPlayerBackpack = false;
+        }
+    }
+
     private void OnCollisionStay(Collision collision)
     {
-        grounded = true;
+        EvaluateGroundCollision(collision);
+
+        // TODO: This is triggering when players just bump into each other for some reason.
+        // I'll try fixing it by checking the normal, but this shouldn't be necessary.
+        if (collision.collider.CompareTag("BackpackFloor"))
+        {
+            Vector3 normal = collision.GetContact(0).normal;
+            if (normal.y >= 0.9f)
+            {
+                belowPlayersVelocity = collision.rigidbody.velocity;
+            }
+        }
+    }
+
+    private void EvaluateGroundCollision(Collision collision)
+    {
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            Vector3 normal = collision.GetContact(i).normal;
+            grounded |= normal.y >= 0.9f;
+        }
     }
 
     public void Enable()
     {
         enable = true;
+        // Reset parent
+        this.transform.SetParent(null);
     }
 
     public void Disable()

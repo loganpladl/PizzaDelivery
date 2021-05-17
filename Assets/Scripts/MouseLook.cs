@@ -51,6 +51,12 @@ public class MouseLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Hacky way to avoid doing anything if the game is paused
+        if (Time.timeScale == 0)
+        {
+            return;
+        }
+
         transform.position = targetTransform.transform.position;
         transform.rotation = targetTransform.transform.rotation;
         //Look();

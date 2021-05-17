@@ -17,9 +17,11 @@ public class Character : MonoBehaviour
     [SerializeField]
     MouseLook mouseLook;
 
-    // TODO: replace these mesh renderers with just one for the final character model
     [SerializeField]
-    SkinnedMeshRenderer[] characterMesh;
+    SkinnedMeshRenderer characterMesh;
+
+    [SerializeField]
+    MeshRenderer characterBackpackMesh;
 
     // Set by LevelState. Used to rewind correctly.
     float rewindDuration;
@@ -30,6 +32,10 @@ public class Character : MonoBehaviour
 
     bool enable = false;
 
+    bool isActiveCharacter = false;
+
+    LevelState levelState;
+
     private void Awake()
     {
         movementComponent = GetComponent<PlayerMovement>();
@@ -39,7 +45,7 @@ public class Character : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
     }
 
     // Update is called once per frame
@@ -111,16 +117,15 @@ public class Character : MonoBehaviour
 
     private void RecordStep()
     {
-        if (currentStep < 0 || currentStep > 499)
+        if (currentStep >= totalSteps)
         {
-            Debug.Log(currentStep);
+            Debug.Log("Reached current step equal to totalSteps when recording, shouldn't happen");
         }
-        if (timePoints == null)
+        else
         {
-            Debug.Log("Null");
+            timePoints[currentStep] = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
+            currentStep++;
         }
-        timePoints[currentStep] = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
-        currentStep++;
     }
 
     public void SetRewindParameters(int totalSteps, float rewindDuration)
@@ -151,21 +156,17 @@ public class Character : MonoBehaviour
 
     public void SetActiveCharacter()
     {
-        foreach (SkinnedMeshRenderer mesh in characterMesh)
-        {
-            //mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-            mesh.enabled = false;
-        }
+        isActiveCharacter = true;
+        characterMesh.enabled = false;
+        characterBackpackMesh.enabled = false;
         mouseLook.SetCameraActive();
     }
 
     public void SetNotActiveCharacter()
     {
-        foreach (SkinnedMeshRenderer mesh in characterMesh)
-        {
-            //mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            mesh.enabled = true;
-        }
+        isActiveCharacter = false;
+        characterMesh.enabled = true;
+        characterBackpackMesh.enabled = true;
         mouseLook.SetCameraInactive();
     }
 
@@ -177,5 +178,21 @@ public class Character : MonoBehaviour
     public void TryJump()
     {
         movementComponent.TryJump();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("OutOfBounds"))
+        {
+            if (isActiveCharacter)
+            {
+                levelState.EarlyRewind();
+            }
+        }
+    }
+
+    public void SetRewindDuration()
+    {
+        this.rewindDuration = rewindDuration;
     }
 }

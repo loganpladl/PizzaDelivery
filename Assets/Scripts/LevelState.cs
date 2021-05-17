@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 
 public class LevelState : MonoBehaviour
 {
@@ -28,6 +29,9 @@ public class LevelState : MonoBehaviour
     [SerializeField]
     GameObject[] universePrompts;
 
+    [SerializeField]
+    GameObject pauseMenu;
+
     int numCharacters;
 
     [SerializeField]
@@ -37,6 +41,10 @@ public class LevelState : MonoBehaviour
     [SerializeField]
     float rewindDuration = 3.0f;
     float rewindTimer;
+
+    // How much faster is rewind compared to normal speed
+    [SerializeField]
+    float rewindSpeed = 3.0f;
 
     // Ratio of level duration to rewind duration. Should be some number greater than or equal to 1.
     float durationRatio;
@@ -69,6 +77,9 @@ public class LevelState : MonoBehaviour
     [SerializeField]
     GameObject playIcon;
 
+    [SerializeField]
+    Animator sceneTransition;
+
     bool levelStarted = false;
 
     bool levelEnded = false;
@@ -92,13 +103,14 @@ public class LevelState : MonoBehaviour
 
         numCharacters = characters.Length;
         levelTimer = levelDuration;
-        rewindTimer = rewindDuration;
+        //rewindTimer = rewindDuration;
+        rewindTimer = levelDuration / rewindSpeed;
 
-        totalSteps = (int)levelDuration * (int)(1 / Time.fixedDeltaTime);
+        totalSteps = (int)(levelDuration * (1 / Time.fixedDeltaTime));
 
         foreach (Character c in characters)
         {
-            c.SetRewindParameters(totalSteps, rewindDuration);
+            c.SetRewindParameters(totalSteps, levelDuration / rewindSpeed);
         }
 
         rewindPostProcessVolume.weight = 0;
@@ -109,28 +121,18 @@ public class LevelState : MonoBehaviour
         inputManager.Init(characters);
 
         activeCharacter = characters[0];
+
+        StartCoroutine(StartLevel());
+        shiftPostProcessVolume.weight = 1;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Wait for level to get started by coroutine called in start method
         if (!levelStarted)
         {
-            levelStarted = true;
-            foreach (Character c in characters)
-            {
-                if (c == activeCharacter)
-                {
-                    c.SetActiveCharacter();
-                }
-                else
-                {
-                    c.SetNotActiveCharacter();
-                    c.gameObject.SetActive(false);
-                }
-            }
-
-            StartLoop();
+            return;
         }
         else if (levelStarted && !levelEnded)
         {
@@ -142,11 +144,42 @@ public class LevelState : MonoBehaviour
                 {
                     StartCoroutine(LoopEnd());
                 }
+
+                // TODO: Should handle these inputs in inputmanager but time is precious
+                // Check for player pause
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    if (pauseMenu.activeInHierarchy)
+                    {
+                        pauseMenu.SetActive(false);
+                        Cursor.lockState = CursorLockMode.Locked;
+                        Time.timeScale = 1;
+                    }
+                    else
+                    {
+                        pauseMenu.SetActive(true);
+                        Cursor.lockState = CursorLockMode.None;
+                        Time.timeScale = 0;
+                    }
+                }
+
+                // Check for player rest
+                if (Input.GetKeyDown(KeyCode.R))
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
+
+                // Check for player rewind
+                if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    EarlyRewind();
+                }
             }
             else if (!choosingUniverse)
             {
                 rewindTimer -= Time.deltaTime;
-                timerText.text = ((1 - rewindTimer / rewindDuration) * levelDuration).ToString("00.0");
+                //timerText.text = ((1 - rewindTimer / rewindDuration) * levelDuration).ToString("00.0");
+                timerText.text = (levelDuration - rewindTimer * rewindSpeed).ToString("00.0");
                 if (rewindTimer <= 0)
                 {
                     StopRewind();
@@ -164,6 +197,30 @@ public class LevelState : MonoBehaviour
 
             }
         }
+    }
+
+    IEnumerator StartLevel()
+    {
+        // Wait while start transition happens
+        yield return new WaitForSecondsRealtime(1f);
+
+        levelStarted = true;
+        foreach (Character c in characters)
+        {
+            if (c == activeCharacter)
+            {
+                c.SetActiveCharacter();
+            }
+            else
+            {
+                c.SetNotActiveCharacter();
+                c.gameObject.SetActive(false);
+            }
+        }
+
+        shiftPostProcessVolume.weight = 0;
+
+        StartLoop();
     }
 
     private IEnumerator LoopEnd()
@@ -209,7 +266,7 @@ public class LevelState : MonoBehaviour
         }
 
         // fixes bug where rewinding doesnt start at 0 but at like 1.7secs?
-        rewindTimer = rewindDuration;
+        rewindTimer = levelDuration / rewindSpeed;
 
         loopStarted = true;
 
@@ -296,8 +353,14 @@ public class LevelState : MonoBehaviour
         rewindIcon.SetActive(true);
 
         rewinding = true;
+
+        int stepsToRewind = (int)(levelDuration-levelTimer * (1 / Time.fixedDeltaTime));
+        float rewindDuration = (levelDuration - levelTimer) / rewindSpeed;
+
         foreach (Character c in characters)
         {
+            //c.SetRewindDuration()
+            //c.StartRewind(stepsToRewind, rewindDuration);
             c.StartRewind();
         }
         levelTimer = levelDuration;
@@ -312,7 +375,7 @@ public class LevelState : MonoBehaviour
         {
             c.StopRewind();
         }
-        rewindTimer = rewindDuration;
+        rewindTimer = levelDuration / rewindSpeed;
 
         Time.timeScale = 0f;
     }
@@ -326,7 +389,16 @@ public class LevelState : MonoBehaviour
         {
             c.Disable();
         }
+        inputManager.Disable();
 
+        StartCoroutine(SceneTransition());
+    }
+
+    IEnumerator SceneTransition()
+    {
+        sceneTransition.SetTrigger("LevelOver");
+        yield return new WaitForSecondsRealtime(1.0f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
     public void DisplayKnockPrompt()
@@ -352,5 +424,23 @@ public class LevelState : MonoBehaviour
     public float GetTimeSinceLoopStart()
     {
         return levelDuration - levelTimer;
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1;
+        pauseMenu.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
+    // Rewind early if the player presses Q or falls out of bounds
+    public void EarlyRewind()
+    {
+
     }
 }

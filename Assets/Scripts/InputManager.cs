@@ -46,6 +46,12 @@ public class InputManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Hacky way to avoid doing anything when the game is paused
+        if (Time.timeScale == 0)
+        {
+            return;
+        }
+
         if (enable)
         {
             Record();
