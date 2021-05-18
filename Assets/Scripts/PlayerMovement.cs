@@ -44,9 +44,12 @@ public class PlayerMovement : MonoBehaviour
     bool onPlayerBackpack = false;
     Vector3 belowPlayersVelocity;
 
+    Character character;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
+        character = GetComponent<Character>();
     }
 
     // Start is called before the first frame update
@@ -110,6 +113,7 @@ public class PlayerMovement : MonoBehaviour
         if (grounded && tryJump)
         {
             rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
+            character.JumpSound();
             animator.SetTrigger("Jumped");
         }
 
@@ -129,6 +133,12 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Vertical", 0);
         animator.SetFloat("Horizontal", 0);
         animator.SetBool("Grounded", grounded);
+    }
+
+    // Cancel rigidbody velocity. Used when the player knocks on the door.
+    public void CancelVelocity()
+    {
+        rigidBody.velocity = Vector3.zero;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -185,8 +195,6 @@ public class PlayerMovement : MonoBehaviour
     public void Enable()
     {
         enable = true;
-        // Reset parent
-        this.transform.SetParent(null);
     }
 
     public void Disable()
@@ -197,5 +205,10 @@ public class PlayerMovement : MonoBehaviour
     public void TryJump()
     {
         tryJump = true;
+    }
+
+    public bool IsGrounded()
+    {
+        return grounded;
     }
 }

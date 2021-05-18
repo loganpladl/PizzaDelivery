@@ -10,9 +10,6 @@ public class MouseLook : MonoBehaviour
     [SerializeField]
     float acceleration;
 
-    float prevMouseXVelocity;
-    float prevMouseYVelocity;
-
     [SerializeField]
     Transform targetTransform;
 
@@ -30,10 +27,17 @@ public class MouseLook : MonoBehaviour
     [SerializeField]
     CinemachineVirtualCamera vcam;
 
-    private Vector2 rotation; // Current rotation in degrees
     Vector2 velocity;
 
     float CameraVerticalRotation = 0.0f;
+
+    [SerializeField]
+    float positionSmoothing = 1;
+
+    [SerializeField]
+    float rotationSmoothing = 1;
+
+    bool enableRaycasting = false;
 
     // Accumulate horizontal rotation from input manager. Reset when updating rigidbody rotation.
     float CameraHorizontalRotation = 0.0f;
@@ -46,6 +50,7 @@ public class MouseLook : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
 
+        vcam.transform.position = transform.position;
     }
 
     // Update is called once per frame
@@ -59,29 +64,29 @@ public class MouseLook : MonoBehaviour
 
         transform.position = targetTransform.transform.position;
         transform.rotation = targetTransform.transform.rotation;
-        //Look();
 
+
+        CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
+        Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
+        Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
+        gameObject.transform.localRotation = Quaternion.Euler(newEuler);
+
+        if (enable && enableRaycasting)
+        {
+            Raycast();
+        }
+
+        vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
+        vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing * Time.deltaTime);
+    }
+
+    private void FixedUpdate()
+    {
         if (enable)
         {
-            CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
-            Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
-            Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
-            gameObject.transform.localRotation = Quaternion.Euler(newEuler);
-
             Vector3 eulerHorizontal = new Vector3(0.0f, CameraHorizontalRotation, 0.0f);
             CameraHorizontalRotation = 0;
             PlayerRigidbody.MoveRotation(PlayerRigidbody.rotation * Quaternion.Euler(eulerHorizontal));
-
-            Raycast();
-        }
-        // Just adjust according to camera vertical rotation if disabled
-        else
-        {
-            Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
-            Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
-            gameObject.transform.localRotation = Quaternion.Euler(newEuler);
-
-            levelState.HideKnockPrompt();
         }
     }
 
@@ -89,9 +94,6 @@ public class MouseLook : MonoBehaviour
     {
         velocity.x = xVelocity;
         velocity.y = yVelocity;
-
-        prevMouseXVelocity = xVelocity;
-        prevMouseYVelocity = yVelocity;
 
         // Negate vertical input since positive movement is normally downward
         CameraVerticalRotation -= velocity.y;
@@ -154,9 +156,13 @@ public class MouseLook : MonoBehaviour
         vcam.Priority = -1;
     }
 
-    public void GetPrevMouseVelocities(out float prevMouseXVelocity, out float prevMouseYVelocity)
+    public void EnableRaycasting()
     {
-        prevMouseXVelocity = this.prevMouseXVelocity;
-        prevMouseYVelocity = this.prevMouseYVelocity;
+        enableRaycasting = true;
+    }
+
+    public void DisableRaycasting()
+    {
+        enableRaycasting = false;
     }
 }

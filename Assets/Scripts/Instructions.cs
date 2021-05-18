@@ -13,19 +13,11 @@ public class Instructions : MonoBehaviour
     [SerializeField]
     Animator sceneTransition;
 
+    [SerializeField]
+    AudioSource clickAudioSource;
+
     int currentPage = 0;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void Continue()
     {
@@ -33,10 +25,12 @@ public class Instructions : MonoBehaviour
         {
             textOne.SetActive(false);
             textTwo.SetActive(true);
+            clickAudioSource.Play();
         }
         else if (currentPage == 1)
         {
             StartCoroutine(StartGame());
+            clickAudioSource.Play();
         }
         currentPage++;
     }

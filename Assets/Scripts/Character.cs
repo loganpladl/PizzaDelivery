@@ -23,6 +23,21 @@ public class Character : MonoBehaviour
     [SerializeField]
     MeshRenderer characterBackpackMesh;
 
+    [SerializeField]
+    AudioClip[] footstepSounds;
+
+    [SerializeField]
+    AudioSource footstepAudioSource;
+
+    [SerializeField]
+    AudioSource mouthAudioSource;
+
+    [SerializeField]
+    AudioClip jumpSound;
+
+    [SerializeField]
+    AudioClip landSound;
+
     // Set by LevelState. Used to rewind correctly.
     float maxRewindDuration;
     int totalSteps;
@@ -39,6 +54,19 @@ public class Character : MonoBehaviour
     // Always revert to initial point at the end to ensure consistency
     TimePoint initialPoint;
 
+    // Prevent duplicate footsteps
+    float footstepSoundTimer = 0;
+    [SerializeField]
+    float footstepSoundIncrement = .05f;
+
+    // grounded status on last update
+    bool wasGrounded = true;
+
+    // Only play landing sound if you were in the air for some number of seconds
+    float inAirTimer;
+    [SerializeField]
+    float secondsInAirForLandSound = .25f;
+
     private void Awake()
     {
         movementComponent = GetComponent<PlayerMovement>();
@@ -51,12 +79,33 @@ public class Character : MonoBehaviour
         levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
 
         initialPoint = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
+
+        inAirTimer = secondsInAirForLandSound;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (enable)
+        {
+            footstepSoundTimer -= Time.deltaTime;
+
+            if (wasGrounded)
+            {
+                inAirTimer = secondsInAirForLandSound;
+            }
+            else
+            {
+                inAirTimer -= Time.deltaTime;
+                if (movementComponent.IsGrounded() && inAirTimer <= 0)
+                {
+                    footstepAudioSource.PlayOneShot(landSound, .1f);
+                    inAirTimer = secondsInAirForLandSound;
+                }
+            }
+
+            wasGrounded = movementComponent.IsGrounded();
+        }
     }
 
     private void FixedUpdate()
@@ -115,7 +164,9 @@ public class Character : MonoBehaviour
     private void RewindStep()
     {
         float frac = 1 - (rewindTimer / maxRewindDuration);
-        
+        // Safety clamp for frac that shouldnt be necessary but just in case
+        frac = Mathf.Clamp(frac, 0, 1);
+
         // TODO: Subtracting 1 to fix off by one error when rewinding. Should look for a better solution.
         currentStep = (int)((totalSteps) * frac) - 1;
 
@@ -123,6 +174,7 @@ public class Character : MonoBehaviour
         if (currentStep >= totalSteps) currentStep = totalSteps - 1;
         if (currentStep < 0) currentStep = 0;
 
+        
         animatorComponent.playbackTime = frac * (animatorComponent.recorderStopTime - animatorComponent.recorderStartTime);
 
         TimePoint timePoint = timePoints[currentStep];
@@ -149,6 +201,12 @@ public class Character : MonoBehaviour
     public void StopMovementAndAnimations()
     {
         movementComponent.StopMovementAndAnimations();
+    }
+
+    // Used by level state when player knocks
+    public void CancelVelocity()
+    {
+        movementComponent.CancelVelocity();
     }
 
     public void SetRewindParameters(int totalSteps, float rewindDuration)
@@ -183,6 +241,7 @@ public class Character : MonoBehaviour
         characterMesh.enabled = false;
         characterBackpackMesh.enabled = false;
         mouseLook.SetCameraActive();
+        mouseLook.EnableRaycasting();
     }
 
     public void SetNotActiveCharacter()
@@ -191,11 +250,7 @@ public class Character : MonoBehaviour
         characterMesh.enabled = true;
         characterBackpackMesh.enabled = true;
         mouseLook.SetCameraInactive();
-    }
-
-    public void GetPrevMouseVelocities(out float prevMouseXVelocity, out float prevMouseYVelocity)
-    {
-        mouseLook.GetPrevMouseVelocities(out prevMouseXVelocity, out prevMouseYVelocity);
+        mouseLook.DisableRaycasting();
     }
 
     public void TryJump()
@@ -212,5 +267,29 @@ public class Character : MonoBehaviour
                 levelState.EarlyRewind();
             }
         }
+    }
+
+    public void FootstepSound()
+    {
+        if (enable && movementComponent.IsGrounded() && footstepSoundTimer <= 0)
+        {
+            int index = Random.Range(0, footstepSounds.Length);
+
+            footstepAudioSource.PlayOneShot(footstepSounds[index], .6f);
+            footstepSoundTimer = footstepSoundIncrement;
+        }
+    }
+
+    public void JumpSound()
+    {
+
+        mouthAudioSource.clip = jumpSound;
+        mouthAudioSource.volume = .7f;
+        mouthAudioSource.Play();
+    }
+
+    public void LandSound()
+    {
+        //footstepAudioSource.PlayOneShot(landSound);
     }
 }

@@ -16,6 +16,9 @@ public class Intro : MonoBehaviour
     [SerializeField]
     AudioSource titleLoopAudioSource;
 
+    [SerializeField]
+    AudioSource clickAudioSource;
+
     // Time until vocals start
     [SerializeField] 
     float introDelay;
@@ -29,6 +32,8 @@ public class Intro : MonoBehaviour
 
     [SerializeField]
     GameObject circleTransition;
+
+    bool gameStarted = false;
 
     // Start is called before the first frame update
     void Start()
@@ -62,7 +67,12 @@ public class Intro : MonoBehaviour
 
     public void StartGame()
     {
-        StartCoroutine(StartGameCoroutine());
+        if (!gameStarted)
+        {
+            gameStarted = true;
+            clickAudioSource.Play();
+            StartCoroutine(StartGameCoroutine());
+        }
     }
 
     // Load scene after transition
