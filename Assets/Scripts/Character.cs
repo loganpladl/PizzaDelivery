@@ -67,10 +67,16 @@ public class Character : MonoBehaviour
     [SerializeField]
     float secondsInAirForLandSound = .25f;
 
+    Vector3 initialRigidbodyPosition;
+    Quaternion initialRigidbodyRotation;
+
     private void Awake()
     {
         movementComponent = GetComponent<PlayerMovement>();
         rigidbodyComponent = GetComponent<Rigidbody>();
+
+        initialRigidbodyPosition = rigidbodyComponent.position;
+        initialRigidbodyRotation = rigidbodyComponent.rotation;
     }
 
     // Start is called before the first frame update
@@ -224,6 +230,11 @@ public class Character : MonoBehaviour
         movementComponent.Enable();
         mouseLook.Enable();
         animatorComponent.StartRecording(0);
+
+        // Trying to reset rigidbody position and rotation at the start of each loop for determinism
+        rigidbodyComponent.position = initialRigidbodyPosition;
+        rigidbodyComponent.rotation = initialRigidbodyRotation;
+        rigidbodyComponent.velocity = Vector3.zero;
     }
 
     // Disabled at the end of each loop

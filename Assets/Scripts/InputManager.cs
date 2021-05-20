@@ -28,6 +28,10 @@ public class InputManager : MonoBehaviour
     int currentFixedStep = 0;
     int activeCharacterCommandIndex = 0;
 
+    // For testing discrepancies between recorded positions and current positions
+    // The index represents fixed steps, and the value is the position BEFORE applying inputs on that step
+    Dictionary<Character, List<Vector3>> recordedPositions = new Dictionary<Character, List<Vector3>>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,9 +52,6 @@ public class InputManager : MonoBehaviour
         {
             Record();
         }
-        
-        
-
     }
 
     // TODO: Should maybe just do everything in here for determinism? But would it make input unresponsive? Should investigate.
@@ -61,8 +62,45 @@ public class InputManager : MonoBehaviour
             ExecuteActivePlayerCommands();
 
             Playback();
+
+            // Uncomment to test replay divergence
+            //TestReplayDivergence();
         }
+
+        
+
+
         currentFixedStep++;
+    }
+
+    private void TestReplayDivergence()
+    {
+        foreach (Character c in characters)
+        {
+            if (c == characters[activeCharacterIndex])
+            {
+                // Determinism test
+                recordedPositions[c].Add(c.GetComponent<Rigidbody>().position);
+            }
+
+            if (c != characters[activeCharacterIndex] && recordedPositions[c].Count > currentFixedStep)
+            {
+                Vector3 recordedPosition = recordedPositions[c][currentFixedStep];
+                Vector3 playbackPosition = c.GetComponent<Rigidbody>().position;
+
+                Debug.Log("Divergence Test: Fixed Step #" + currentFixedStep);
+
+                Debug.Log("Character Index: " + System.Array.IndexOf(characters, c));
+                if (recordedPosition == playbackPosition)
+                {
+                    Debug.Log("SUCCESS");
+                }
+                else
+                {
+                    Debug.Log("FAILURE. Recorded Position: " + recordedPosition.ToString("F7") + " Playback Position: " + playbackPosition.ToString("F7"));
+                }
+            }
+        }
     }
 
     // Executes commands in fixed update after creating them in Update
@@ -70,12 +108,22 @@ public class InputManager : MonoBehaviour
     {
         Character activeCharacter = characters[activeCharacterIndex];
 
+        // Determinism test
+        //recordedPositions[activeCharacter].Add(activeCharacter.GetComponent<Rigidbody>().position);
+
         while (commands[activeCharacter].Count > activeCharacterCommandIndex)
         {
+            // Replace the key value pair with the proper fixed step value since we are now in fixed update.
+            // TODO: Should do this in a much cleaner way.
+            commands[activeCharacter][activeCharacterCommandIndex] = new KeyValuePair<CommandPattern.Command, int>(commands[activeCharacter][activeCharacterCommandIndex].Key, currentFixedStep);
+
             CommandPattern.Command nextCommand = commands[activeCharacter][activeCharacterCommandIndex].Key;
+            
             nextCommand.Execute();
             activeCharacterCommandIndex++;
         }
+
+        
     }
 
     public void Init(Character[] characters)
@@ -87,6 +135,9 @@ public class InputManager : MonoBehaviour
         foreach (Character c in characters)
         {
             commands.Add(c, new List<KeyValuePair<CommandPattern.Command, int>>());
+
+            // Determinism testing
+            recordedPositions.Add(c, new List<Vector3>());
         }
     }
 
@@ -95,6 +146,8 @@ public class InputManager : MonoBehaviour
         Character activeCharacter = characters[activeCharacterIndex];
 
         commands[activeCharacter].Clear();
+        // Reset position recordings for accuracy testing
+        recordedPositions[activeCharacter].Clear();
 
         for (int i = 0; i < currentReplayIndices.Length; i++)
         {
@@ -109,6 +162,7 @@ public class InputManager : MonoBehaviour
     void Record()
     {
         Character activeCharacter = characters[activeCharacterIndex];
+
         // Get movement and look commands every update
         CommandPattern.Command movement = new CommandPattern.Movement(activeCharacter, Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
@@ -121,6 +175,9 @@ public class InputManager : MonoBehaviour
         CommandPattern.Command look = new CommandPattern.Look(activeCharacter, mouseXVelocity, mouseYVelocity);
 
         // Store commands alongside current time
+        // TODO: These current fixed steps are not valid, because they are executed on the NEXT fixed update.
+        // Maybe could just add one, but to be safe I'm replacing this key value pair with a copy with the correct fixed step before the commands are executed in fixedUpdate.
+        // Should look for a cleaner way to do this.
         commands[activeCharacter].Add(new KeyValuePair<CommandPattern.Command, int>(movement, currentFixedStep));
         commands[activeCharacter].Add(new KeyValuePair<CommandPattern.Command, int>(look, currentFixedStep));
 
@@ -136,6 +193,19 @@ public class InputManager : MonoBehaviour
         for (int i = 0; i < characters.Length; i++)
         {
             Character currentCharacter = characters[i];
+
+            /*
+            // Determinism testing TODO: Only want to do quick test on blue player right now but should test all of them properly
+            if (currentFixedStep < recordedPositions[currentCharacter].Count)
+            {
+                if (i != activeCharacterIndex && currentCharacter == characters[0] && currentCharacter.GetComponent<Rigidbody>().position != recordedPositions[currentCharacter][currentFixedStep])
+                {
+                    Debug.Log("ERROR: Position Discrepancy at fixed step #" + currentFixedStep);
+                    Debug.Log("Recorded Position: " + recordedPositions[currentCharacter][currentFixedStep].ToString("F6") + " Playback position: " + currentCharacter.GetComponent<Rigidbody>().position.ToString("F6"));
+                }
+            }
+            */
+
             // Execute recorded actions for characters other than the active one
             if (i != activeCharacterIndex)
             {
@@ -159,6 +229,11 @@ public class InputManager : MonoBehaviour
                     }
                     else if (!reachedEnd[i])
                     {
+                        if (currentFixedStep != nextPair.Value)
+                        {
+                            Debug.Log("ERROR");
+                        }
+
                         nextPair.Key.Execute();
 
                         // If we've reached the end of this command list

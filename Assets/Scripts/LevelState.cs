@@ -111,12 +111,6 @@ public class LevelState : MonoBehaviour
     AudioClip knockSound;
 
     [SerializeField]
-    AudioClip sceneTransitionSoundIn;
-
-    [SerializeField]
-    AudioClip sceneTransitionSoundOut;
-
-    [SerializeField]
     AudioSource rewindAudioSource;
 
     [SerializeField]
@@ -155,6 +149,9 @@ public class LevelState : MonoBehaviour
     [SerializeField]
     float GreenUniverseMusicVolume = .5f;
 
+    // Flag to start loop in fixed update to synchronize replays
+    bool startLoopNextFixedUpdate = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -183,6 +180,15 @@ public class LevelState : MonoBehaviour
         shiftPostProcessVolume.weight = 0;
     }
 
+    void FixedUpdate()
+    {
+        if (startLoopNextFixedUpdate)
+        {
+            startLoopNextFixedUpdate = false;
+            StartLoopFixed();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -208,17 +214,11 @@ public class LevelState : MonoBehaviour
                 {
                     if (pauseMenu.activeInHierarchy)
                     {
-                        pauseMenu.SetActive(false);
-                        musicAudioSource.Play();
-                        Cursor.lockState = CursorLockMode.Locked;
-                        Time.timeScale = 1;
+                        Unpause();
                     }
                     else
                     {
-                        pauseMenu.SetActive(true);
-                        musicAudioSource.Pause();
-                        Cursor.lockState = CursorLockMode.None;
-                        Time.timeScale = 0;
+                        Pause();
                     }
                 }
 
@@ -270,10 +270,24 @@ public class LevelState : MonoBehaviour
         }
     }
 
+    void Pause()
+    {
+        pauseMenu.SetActive(true);
+        musicAudioSource.Pause();
+        Cursor.lockState = CursorLockMode.None;
+        Time.timeScale = 0;
+    }
+
+    public void Unpause()
+    {
+        pauseMenu.SetActive(false);
+        musicAudioSource.Play();
+        Cursor.lockState = CursorLockMode.Locked;
+        Time.timeScale = 1;
+    }
+
     IEnumerator StartLevel()
     {
-        //soundEffectSource.PlayOneShot(sceneTransitionSoundOut, .45f);
-
         musicAudioSource.clip = musicClipBlueUniverse;
         musicAudioSource.volume = BlueUniverseMusicVolume;
 
@@ -284,11 +298,10 @@ public class LevelState : MonoBehaviour
         yield return new WaitForSecondsRealtime(.5f);
 
         deliveryStart.SetTrigger("Start");
-        
 
         yield return new WaitForSecondsRealtime(.4f);
         // Level start sound is best here but total wait needs to be .5s
-        soundEffectSource.PlayOneShot(levelStartSound, .5f);
+        soundEffectSource.PlayOneShot(levelStartSound, .4f);
         yield return new WaitForSecondsRealtime(.1f);
 
         levelStarted = true;
@@ -304,8 +317,6 @@ public class LevelState : MonoBehaviour
                 c.gameObject.SetActive(false);
             }
         }
-
-        //shiftPostProcessVolume.weight = 1;
 
         StartLoop();
     }
@@ -342,14 +353,17 @@ public class LevelState : MonoBehaviour
 
     public void StartLoop()
     {
+        startLoopNextFixedUpdate = true;
+    }
+
+    // Start loop synchronized to fixed Update to guarantee determinism
+    public void StartLoopFixed()
+    {
         musicAudioSource.Play();
 
         loopEnded = false;
-        
-        shiftPostProcessVolume.weight = 0;
 
-        inputManager.Enable();
-        inputManager.StartLoop();
+        shiftPostProcessVolume.weight = 0;
 
         foreach (Character c in characters)
         {
@@ -357,8 +371,11 @@ public class LevelState : MonoBehaviour
             {
                 c.Enable();
             }
-            
+
         }
+
+        inputManager.Enable();
+        inputManager.StartLoop();
 
         // fixes bug where rewinding doesnt start at 0 but at like 1.7secs?
         rewindTimer = levelDuration / rewindSpeed;
@@ -390,8 +407,7 @@ public class LevelState : MonoBehaviour
         yield return new WaitForSecondsRealtime(.5f);
 
         // Play animation here instead of StartLoop to avoid playing when the StartLevel function calls StartLoop()
-        playIcon.GetComponent<Animation>().Play();
-        soundEffectSource.PlayOneShot(loopPlaySound, .5f);
+        ShowPlayIconAndSound();
 
         universeShifting = false;
         StartLoop();
@@ -399,131 +415,80 @@ public class LevelState : MonoBehaviour
 
     public void BlueUniversePicked()
     {
+        UniversePicked(0);
+    }
+
+    public void RedUniversePicked()
+    {
+        UniversePicked(1);
+    }
+
+    public void GreenUniversePicked()
+    {
+        UniversePicked(2);
+    }
+
+    void ShowPlayIconAndSound()
+    {
+        playIcon.GetComponent<Animation>().Play();
+        soundEffectSource.PlayOneShot(loopPlaySound, .5f);
+    }
+
+    
+    // Universe picked where blue is index 0, red is index 1, and green is index 3
+    private void UniversePicked(int index)
+    {
         choosingUniverse = false;
 
-        musicAudioSource.clip = musicClipBlueUniverse;
-        musicAudioSource.volume = BlueUniverseMusicVolume;
-
         // Skip universe transition if the character is already active
-        if (activeCharacter == characters[0])
+        if (activeCharacter == characters[index])
         {
             Time.timeScale = 1;
-            playIcon.GetComponent<Animation>().Play();
             rewindPostProcessVolume.weight = 0;
             universePrompts[numCharacters - 2].SetActive(false);
             universePromptText.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
-            soundEffectSource.PlayOneShot(loopPlaySound, .5f);
+            ShowPlayIconAndSound();
             StartLoop();
             return;
         }
 
         activeCharacter.SetNotActiveCharacter();
         // TODO: Hardcoding index is bad. Should refactor how I handle multiple characters/universes
-        activeCharacter = characters[0];
-        inputManager.SetActiveCharacter(0);
+        activeCharacter = characters[index];
+        inputManager.SetActiveCharacter(index);
 
-        if (numCharacters == 2)
-        {
-            blueUniverseHereDouble.SetActive(true);
-            redUniverseHereDouble.SetActive(false);
-
-            timerBackgrounds[0].SetActive(true);
-            timerBackgrounds[1].SetActive(false);
-        }
-        else if (numCharacters == 3)
-        {
-            blueUniverseHereTriple.SetActive(true);
-            redUniverseHereTriple.SetActive(false);
-            greenUniverseHereTriple.SetActive(false);
-
-            timerBackgrounds[0].SetActive(true);
-            timerBackgrounds[1].SetActive(false);
-            timerBackgrounds[2].SetActive(false);
-        }
-
-        StartCoroutine(UniverseShift());
-    }
-
-    public void RedUniversePicked()
-    {
-        choosingUniverse = false;
-
-        musicAudioSource.clip = musicClipRedUniverse;
-        musicAudioSource.volume = RedUniverseMusicVolume;
-
-        // Skip universe transition if the character is already active
-        if (activeCharacter == characters[1])
-        {
-            Time.timeScale = 1;
-            playIcon.GetComponent<Animation>().Play();
-            rewindPostProcessVolume.weight = 0;
-            universePrompts[numCharacters - 2].SetActive(false);
-            universePromptText.SetActive(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            soundEffectSource.PlayOneShot(loopPlaySound, .5f);
-            StartLoop();
-            return;
-        }
-
-        activeCharacter.SetNotActiveCharacter();
-        activeCharacter = characters[1];
-        inputManager.SetActiveCharacter(1);
-
-        if (numCharacters == 2)
-        {
-            blueUniverseHereDouble.SetActive(false);
-            redUniverseHereDouble.SetActive(true);
-
-            timerBackgrounds[0].SetActive(false);
-            timerBackgrounds[1].SetActive(true);
-        }
-        else if (numCharacters == 3)
-        {
-            blueUniverseHereTriple.SetActive(false);
-            redUniverseHereTriple.SetActive(true);
-            greenUniverseHereTriple.SetActive(false);
-
-            timerBackgrounds[0].SetActive(false);
-            timerBackgrounds[1].SetActive(true);
-            timerBackgrounds[2].SetActive(false);
-        }
-
-        StartCoroutine(UniverseShift());
-    }
-
-    public void GreenUniversePicked()
-    {
-        choosingUniverse = false;
-
-        musicAudioSource.clip = musicClipGreenUniverse;
-        musicAudioSource.volume = GreenUniverseMusicVolume;
-
-        // Skip universe transition if the character is already active
-        if (activeCharacter == characters[2])
-        {
-            Time.timeScale = 1;
-            playIcon.GetComponent<Animation>().Play();
-            rewindPostProcessVolume.weight = 0;
-            universePrompts[numCharacters - 2].SetActive(false);
-            universePromptText.SetActive(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            soundEffectSource.PlayOneShot(loopPlaySound, .5f);
-            StartLoop();
-            return;
-        }
-
-        activeCharacter.SetNotActiveCharacter();
-        activeCharacter = characters[2];
-        inputManager.SetActiveCharacter(2);
-
+        // Reset location symbol
         blueUniverseHereTriple.SetActive(false);
         redUniverseHereTriple.SetActive(false);
-        greenUniverseHereTriple.SetActive(true);
-
+        greenUniverseHereTriple.SetActive(false);
+        // Reset timer background sprite
         timerBackgrounds[0].SetActive(false);
         timerBackgrounds[1].SetActive(false);
-        timerBackgrounds[2].SetActive(true);
+        timerBackgrounds[2].SetActive(false);
+
+        // Activate proper location symboland set proper music
+        if (index == 0)
+        {
+            blueUniverseHereTriple.SetActive(true);
+            musicAudioSource.clip = musicClipBlueUniverse;
+            musicAudioSource.volume = BlueUniverseMusicVolume;
+        }
+        else if (index == 1)
+        {
+            redUniverseHereTriple.SetActive(true);
+            musicAudioSource.clip = musicClipRedUniverse;
+            musicAudioSource.volume = RedUniverseMusicVolume;
+        }
+        else if (index == 2)
+        {
+            greenUniverseHereTriple.SetActive(true);
+            musicAudioSource.clip = musicClipGreenUniverse;
+            musicAudioSource.volume = GreenUniverseMusicVolume;
+        }
+
+        // Activate proper timer background
+        timerBackgrounds[index].SetActive(true);
 
         StartCoroutine(UniverseShift());
     }
@@ -583,8 +548,6 @@ public class LevelState : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(1.0f);
         sceneTransition.SetTrigger("StartTransition");
-        // Sound effect plays a little early so delay for .1s, total wait from transition start to scene load needs to remain 1 second
-        //soundEffectSource.PlayOneShot(sceneTransitionSoundIn, .45f);
         yield return new WaitForSecondsRealtime(1.0f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
@@ -612,14 +575,6 @@ public class LevelState : MonoBehaviour
     public float GetTimeSinceLoopStart()
     {
         return levelDuration - levelTimer;
-    }
-
-    public void ResumeGame()
-    {
-        Time.timeScale = 1;
-        pauseMenu.SetActive(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        musicAudioSource.Play();
     }
 
     public void QuitGame()

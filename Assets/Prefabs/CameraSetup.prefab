@@ -52,8 +52,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   vcam: {fileID: 4898587746920144462}
-  positionSmoothing: 300
-  rotationSmoothing: 300
+  positionSmoothing: 100
+  rotationSmoothing: 100
 --- !u!1 &4898587747510887154
 GameObject:
   m_ObjectHideFlags: 0

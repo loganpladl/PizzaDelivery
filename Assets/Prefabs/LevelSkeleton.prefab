@@ -538,9 +538,9 @@ MonoBehaviour:
   musicClipRedUniverse: {fileID: 8300000, guid: 5fd8e6b63d061a94c8ad1385fbe87b28, type: 3}
   musicClipGreenUniverse: {fileID: 8300000, guid: 3f39e31a2fa03be42a9b819c5487424d, type: 3}
   universeShiftSound: {fileID: 8300000, guid: e34fbc7c845ba1849b9e3ca87748727f, type: 3}
-  BlueUniverseMusicVolume: 0.9
-  RedUniverseMusicVolume: 0.8
-  GreenUniverseMusicVolume: 0.5
+  BlueUniverseMusicVolume: 0.8
+  RedUniverseMusicVolume: 0.7
+  GreenUniverseMusicVolume: 0.4
 --- !u!1 &8709569545929810463
 GameObject:
   m_ObjectHideFlags: 0
@@ -723,15 +723,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4703980213301803909, guid: 86c5b7bc7d76b764c9fbbc1a87d3eaa3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.25
       objectReference: {fileID: 0}
     - target: {fileID: 4703980213301803909, guid: 86c5b7bc7d76b764c9fbbc1a87d3eaa3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.469
+      value: 1.439
       objectReference: {fileID: 0}
     - target: {fileID: 4703980213301803909, guid: 86c5b7bc7d76b764c9fbbc1a87d3eaa3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.28
+      value: -0.008
       objectReference: {fileID: 0}
     - target: {fileID: 4703980213301803909, guid: 86c5b7bc7d76b764c9fbbc1a87d3eaa3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1025,6 +1025,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 8709569545338382524}
+    - target: {fileID: 8772337427215971955, guid: cf7da810c91402940a454cf9eb37060e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Unpause
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf7da810c91402940a454cf9eb37060e, type: 3}
 --- !u!224 &2195501770572961670 stripped

@@ -44,6 +44,14 @@ public class PlayerMovement : MonoBehaviour
     bool onPlayerBackpack = false;
     Vector3 belowPlayersVelocity;
 
+    //Vector3 attachedWorldPosition;
+    //Transform belowPlayerTransform;
+    //Vector3 positionRelativeToBelowPlayer;
+
+    Rigidbody connectedBody, previousConnectedBody;
+
+    Vector3 connectionWorldPosition, connectionLocalPosition;
+
     Character character;
 
     private void Awake()
@@ -88,6 +96,9 @@ public class PlayerMovement : MonoBehaviour
         {
             Move();
         }
+
+        previousConnectedBody = connectedBody;
+        connectedBody = null;
     }
 
     void Move()
@@ -98,6 +109,11 @@ public class PlayerMovement : MonoBehaviour
         {
             //rigidBody.velocity = new Vector3(belowPlayersVelocity.x, rigidBody.velocity.y, belowPlayersVelocity.z);
             adjustedTargetVelocity += belowPlayersVelocity;
+
+            // Subtract position relative to below player from our transform when we last had a collision update, and add it to the adjusted target velocity.
+            //Vector3 connectionMovement = belowPlayerTransform.TransformPoint(positionRelativeToBelowPlayer) - attachedWorldPosition;
+
+            //adjustedTargetVelocity += connectionMovement;
         }
 
         Vector3 newVelocity = rigidBody.velocity;
@@ -154,7 +170,21 @@ public class PlayerMovement : MonoBehaviour
             if (normal.y >= 0.9f)
             {
                 onPlayerBackpack = true;
+                //attachedWorldPosition = rigidBody.position;
+                //belowPlayerTransform = collision.transform;
                 belowPlayersVelocity = collision.rigidbody.velocity;
+                //positionRelativeToBelowPlayer = collision.transform.InverseTransformPoint(transform.position);
+
+                connectedBody = collision.rigidbody;
+                if (connectedBody == previousConnectedBody)
+                {
+                    Vector3 connectionMovement =
+                        connectedBody.transform.TransformPoint(connectionLocalPosition) -
+                        connectionWorldPosition;
+                    belowPlayersVelocity = connectionMovement / Time.deltaTime;
+                }
+                connectionWorldPosition = rigidBody.position;
+                connectionLocalPosition = connectedBody.transform.InverseTransformPoint(connectionWorldPosition);
             }
         }
     }
@@ -178,7 +208,20 @@ public class PlayerMovement : MonoBehaviour
             Vector3 normal = collision.GetContact(0).normal;
             if (normal.y >= 0.9f)
             {
+                //attachedWorldPosition = rigidBody.position;
+                //belowPlayerTransform = collision.transform;
                 belowPlayersVelocity = collision.rigidbody.velocity;
+                //positionRelativeToBelowPlayer = collision.transform.InverseTransformPoint(attachedWorldPosition);
+                connectedBody = collision.rigidbody;
+                if (connectedBody == previousConnectedBody)
+                {
+                    Vector3 connectionMovement =
+                        connectedBody.transform.TransformPoint(connectionLocalPosition) -
+                        connectionWorldPosition;
+                    belowPlayersVelocity = connectionMovement / Time.deltaTime;
+                }
+                connectionWorldPosition = rigidBody.position;
+                connectionLocalPosition = connectedBody.transform.InverseTransformPoint(connectionWorldPosition);
             }
         }
     }
@@ -195,6 +238,10 @@ public class PlayerMovement : MonoBehaviour
     public void Enable()
     {
         enable = true;
+
+        // Reset for deterministic replays
+        targetVelocity = Vector3.zero;
+        rigidBody.velocity = Vector3.zero;
     }
 
     public void Disable()
