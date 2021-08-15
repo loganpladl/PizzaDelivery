@@ -152,6 +152,8 @@ public class LevelState : MonoBehaviour
     // Flag to start loop in fixed update to synchronize replays
     bool startLoopNextFixedUpdate = false;
 
+    List<RewindTarget> rewindTargets;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -162,9 +164,15 @@ public class LevelState : MonoBehaviour
 
         totalSteps = (int)(levelDuration * (1 / Time.fixedDeltaTime));
 
+        rewindTargets = new List<RewindTarget>();
+
         foreach (Character c in characters)
         {
-            c.SetRewindParameters(totalSteps, levelDuration / rewindSpeed);
+            rewindTargets.Add(c.gameObject.GetComponent<RewindTarget>());
+        }
+        foreach (RewindTarget rt in rewindTargets)
+        {
+            rt.SetRewindParameters(totalSteps, levelDuration / rewindSpeed);
         }
 
         rewindPostProcessVolume.weight = 0;
@@ -502,9 +510,9 @@ public class LevelState : MonoBehaviour
 
         rewinding = true;
 
-        foreach (Character c in characters)
+        foreach (RewindTarget rt in rewindTargets)
         {
-            c.StartRewind(rewindTimer);
+            rt.StartRewind(rewindTimer);
         }
         levelTimer = levelDuration;
     }
@@ -516,9 +524,9 @@ public class LevelState : MonoBehaviour
         rewindAudioSource.Stop();
 
         rewinding = false;
-        foreach (Character c in characters)
+        foreach (RewindTarget rt in rewindTargets)
         {
-            c.StopRewind();
+            rt.StopRewind();
         }
         rewindTimer = levelDuration / rewindSpeed;
 

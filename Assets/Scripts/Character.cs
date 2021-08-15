@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    bool rewinding = false;
-
-    TimePoint[] timePoints;
-
     PlayerMovement movementComponent;
     Rigidbody rigidbodyComponent;
 
@@ -38,21 +34,13 @@ public class Character : MonoBehaviour
     [SerializeField]
     AudioClip landSound;
 
-    // Set by LevelState. Used to rewind correctly.
-    float maxRewindDuration;
-    int totalSteps;
-    int currentStep = 0;
-
-    float rewindTimer = 0;
-
     bool enable = false;
 
     bool isActiveCharacter = false;
 
     LevelState levelState;
 
-    // Always revert to initial point at the end to ensure consistency
-    TimePoint initialPoint;
+    [SerializeField] RewindTarget rewindTarget;
 
     // Prevent duplicate footsteps
     float footstepSoundTimer = 0;
@@ -77,6 +65,11 @@ public class Character : MonoBehaviour
 
         initialRigidbodyPosition = rigidbodyComponent.position;
         initialRigidbodyRotation = rigidbodyComponent.rotation;
+
+        rewindTarget.OnRewindStart += OnRewindStarted;
+        rewindTarget.OnRewindEnded += OnRewindEnded;
+        rewindTarget.CreateNewTimePoint += CreateNewTimePoint;
+        rewindTarget.Rewinding += RewindStep;
     }
 
     // Start is called before the first frame update
@@ -84,7 +77,7 @@ public class Character : MonoBehaviour
     {
         levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
 
-        initialPoint = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
+        
 
         inAirTimer = secondsInAirForLandSound;
     }
@@ -116,15 +109,35 @@ public class Character : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (rewinding)
-        {
-            RewindStep();
-            rewindTimer += Time.deltaTime;
-        }
-        if (enable)
-        {
-            RecordStep();
-        }
+        
+    }
+
+    TimePoint CreateNewTimePoint()
+    {
+        return new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
+    }
+
+    void OnRewindStarted()
+    {
+        //movementComponent.Disable();
+        rigidbodyComponent.isKinematic = true;
+        mouseLook.Disable();
+        animatorComponent.StartPlayback();
+    }
+
+    void OnRewindEnded(TimePoint initialTimePoint)
+    {
+        mouseLook.SetVerticalRotation(initialTimePoint.cameraVerticalRotation);
+        //movementComponent.Enable();
+        rigidbodyComponent.isKinematic = false;
+        mouseLook.Enable();
+        animatorComponent.StopPlayback();
+    }
+
+    void RewindStep(float progress, TimePoint timePoint)
+    {
+        animatorComponent.playbackTime = progress * (animatorComponent.recorderStopTime - animatorComponent.recorderStartTime);
+        mouseLook.SetVerticalRotation(timePoint.cameraVerticalRotation);
     }
 
     public void UpdateMove(float horizontal, float vertical)
@@ -137,71 +150,7 @@ public class Character : MonoBehaviour
         mouseLook.UpdateLook(mouseX, mouseY);
     }
 
-    public void StartRewind(float rewindDuration)
-    {
-        //movementComponent.Disable();
-        rigidbodyComponent.isKinematic = true;
-        mouseLook.Disable();
-        rewinding = true;
-
-        rewindTimer = maxRewindDuration - rewindDuration;
-
-        animatorComponent.StartPlayback();
-    }
-
-    public void StopRewind()
-    {
-        // Return to initial time point for consistency
-        transform.position = initialPoint.position;
-        transform.rotation = initialPoint.rotation;
-        mouseLook.SetVerticalRotation(initialPoint.cameraVerticalRotation);
-
-
-        //movementComponent.Enable();
-        rigidbodyComponent.isKinematic = false;
-        mouseLook.Enable();
-        rewinding = false;
-
-        currentStep = 0;
-
-        animatorComponent.StopPlayback();
-    }
-
-    private void RewindStep()
-    {
-        float frac = 1 - (rewindTimer / maxRewindDuration);
-        // Safety clamp for frac that shouldnt be necessary but just in case
-        frac = Mathf.Clamp(frac, 0, 1);
-
-        // TODO: Subtracting 1 to fix off by one error when rewinding. Should look for a better solution.
-        currentStep = (int)((totalSteps) * frac) - 1;
-
-        // TODO: is there a better way to avoid these index out of bounds errors?
-        if (currentStep >= totalSteps) currentStep = totalSteps - 1;
-        if (currentStep < 0) currentStep = 0;
-
-        
-        animatorComponent.playbackTime = frac * (animatorComponent.recorderStopTime - animatorComponent.recorderStartTime);
-
-        TimePoint timePoint = timePoints[currentStep];
-
-        transform.position = timePoint.position;
-        transform.rotation = timePoint.rotation;
-        mouseLook.SetVerticalRotation(timePoint.cameraVerticalRotation);
-    }
-
-    private void RecordStep()
-    {
-        if (currentStep >= totalSteps)
-        {
-            Debug.Log("Reached current step equal to totalSteps when recording, shouldn't happen");
-        }
-        else
-        {
-            timePoints[currentStep] = new TimePoint(transform.position, transform.rotation, mouseLook.GetVerticalRotation());
-            currentStep++;
-        }
-    }
+    
 
     // Used by input manager when it runs out of commands to prevent continued movement/animations
     public void StopMovementAndAnimations()
@@ -215,13 +164,7 @@ public class Character : MonoBehaviour
         movementComponent.CancelVelocity();
     }
 
-    public void SetRewindParameters(int totalSteps, float rewindDuration)
-    {
-        this.totalSteps = totalSteps;
-        this.maxRewindDuration = rewindDuration;
-
-        timePoints = new TimePoint[totalSteps];
-    }
+    
 
     // Enabled at the beginning of each loop
     public void Enable()
@@ -230,6 +173,8 @@ public class Character : MonoBehaviour
         movementComponent.Enable();
         mouseLook.Enable();
         animatorComponent.StartRecording(0);
+
+        rewindTarget.Enable();
 
         // Trying to reset rigidbody position and rotation at the start of each loop for determinism
         rigidbodyComponent.position = initialRigidbodyPosition;
@@ -244,6 +189,8 @@ public class Character : MonoBehaviour
         movementComponent.Disable();
         mouseLook.Disable();
         animatorComponent.StopRecording();
+
+        rewindTarget.Disable();
     }
 
     public void SetActiveCharacter()
