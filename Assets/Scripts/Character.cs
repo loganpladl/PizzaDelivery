@@ -220,7 +220,7 @@ public class Character : MonoBehaviour
     {
         if (other.CompareTag("OutOfBounds"))
         {
-            if (isActiveCharacter)
+            if (isActiveCharacter && enable)
             {
                 levelState.EarlyRewind();
             }

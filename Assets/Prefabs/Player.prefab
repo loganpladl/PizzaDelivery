@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 6507512838311207817}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -142,6 +142,7 @@ MonoBehaviour:
   mouthAudioSource: {fileID: 1147253639237809695}
   jumpSound: {fileID: 8300000, guid: c9e9cb32160d751489f2e38b7d64f4c6, type: 3}
   landSound: {fileID: 8300000, guid: ea714303acee2af42bd003b17b5372e0, type: 3}
+  rewindTarget: {fileID: 0}
   footstepSoundIncrement: 0.1
   secondsInAirForLandSound: 0.25
 --- !u!1 &3759593953627463278
