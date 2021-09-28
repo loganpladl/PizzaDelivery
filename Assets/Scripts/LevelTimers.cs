@@ -5,10 +5,12 @@ using TMPro;
 
 public class LevelTimers : MonoBehaviour
 {
-    [SerializeField]
-    float levelDuration = 10.0f;
-    public float LevelDuration { get => levelDuration; }
+    float levelDuration;
 
+    [SerializeField]
+    LevelTimerObject levelTimerObject;
+
+    public float LevelDuration { get => levelDuration; }
     public float LevelTimer { get; private set; }
     public float RewindTimer { get; private set; }
 
@@ -23,6 +25,22 @@ public class LevelTimers : MonoBehaviour
 
     bool rewinding = false;
     bool ticking = false;
+
+    void Awake()
+    {
+        GameObject configObject = GameObject.FindGameObjectWithTag("Config");
+
+        if (levelTimerObject == null || configObject == null)
+        {
+            // Default 10 second duration if level timer object is not set or we cannot find config object.
+            levelDuration = 10.0f;
+        }
+        else
+        {
+            Config.DifficultyLevel difficultyLevel = configObject.GetComponent<Config>().CurrentDifficulty;
+            levelDuration = levelTimerObject.GetTimeLimit(difficultyLevel);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +64,7 @@ public class LevelTimers : MonoBehaviour
         }
         else
         {
-            SetDefaultTimerText();
+            //SetDefaultTimerText();
         }
     }
 

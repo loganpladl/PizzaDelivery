@@ -8,6 +8,7 @@ TagManager:
   - Door
   - BackpackFloor
   - OutOfBounds
+  - Config
   layers:
   - Default
   - TransparentFX

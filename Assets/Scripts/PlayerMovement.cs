@@ -54,6 +54,11 @@ public class PlayerMovement : MonoBehaviour
 
     Character character;
 
+    // Coyote time
+    [SerializeField] float extraJumpWindow = .1f;
+    float extraJumpTimer;
+    bool jumped = false;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -63,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        extraJumpTimer = extraJumpWindow;
     }
 
     private void Update()
@@ -124,10 +129,20 @@ public class PlayerMovement : MonoBehaviour
         newVelocity.z = Mathf.MoveTowards(newVelocity.z, adjustedTargetVelocity.z, maxSpeedDelta);
         rigidBody.velocity = newVelocity;
 
+        if (grounded)
+        {
+            extraJumpTimer = extraJumpWindow;
+            jumped = false;
+        }
+        else
+        {
+            extraJumpTimer -= Time.fixedDeltaTime;
+        }
         
 
-        if (grounded && tryJump)
+        if (CanJump() && tryJump)
         {
+            jumped = true;
             rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
             character.JumpSound();
             animator.SetTrigger("Jumped");
@@ -139,6 +154,11 @@ public class PlayerMovement : MonoBehaviour
 
         grounded = false;
         tryJump = false;
+    }
+
+    private bool CanJump()
+    {
+        return (grounded || (extraJumpTimer >= 0)) && !jumped;
     }
 
     // Used by input manager when it runs out of commands to prevent continued movement/animations

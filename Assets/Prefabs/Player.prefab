@@ -117,6 +117,7 @@ MonoBehaviour:
   jumpSpeed: 7
   animator: {fileID: 2680029289884544477}
   animationBlendDelta: 5
+  extraJumpWindow: 0.2
 --- !u!114 &6507512838311207817
 MonoBehaviour:
   m_ObjectHideFlags: 0

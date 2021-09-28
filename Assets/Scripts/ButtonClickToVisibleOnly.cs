@@ -10,8 +10,9 @@ public class ButtonClickToVisibleOnly : MonoBehaviour
 
     /*
     * IMAGE MUST HAVE IN SETTINGS
-    *          TEXTURE TYPE - SPRITE (2D AND UI)
-    *          READ/WRITE ENABLED
+    * 		TEXTURE TYPE - SPRITE (2D AND UI)
+	* 		MESH TYPE - FULL RECT
+    *		READ/WRITE ENABLED
     */
 
     // Start is called before the first frame update

@@ -92,6 +92,12 @@ public class LevelState : MonoBehaviour
     {
         if (startLoopNextFixedUpdate)
         {
+            // Start the level if it hasn't started already
+            if (levelStarted == false)
+            {
+                levelStarted = true;
+            }
+
             startLoopNextFixedUpdate = false;
             StartLoopFixed();
         }
@@ -142,6 +148,7 @@ public class LevelState : MonoBehaviour
             }
             else if (!universeShift.ChoosingUniverse && !universeShift.UniverseShifting)
             {
+                Debug.Log("test");
                 if (levelTimers.IsRewindTimerOver())
                 {
                     rewindController.StopRewind();
@@ -199,7 +206,6 @@ public class LevelState : MonoBehaviour
         AudioManager.Instance.PlayLevelStartSound();
         yield return new WaitForSecondsRealtime(.1f);
 
-        levelStarted = true;
         foreach (Character c in characters)
         {
             if (c == activeCharacter)
@@ -288,6 +294,8 @@ public class LevelState : MonoBehaviour
 
     public void Victory()
     {
+        levelTimers.StopTicking();
+
         levelEnded = true;
         HideKnockPrompt();
         pizzaDeliveredUI.SetActive(true);

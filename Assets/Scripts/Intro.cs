@@ -35,6 +35,9 @@ public class Intro : MonoBehaviour
 
     bool gameStarted = false;
 
+    [SerializeField] GameObject mainPanel;
+    [SerializeField] GameObject difficultyPanel;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,7 +68,44 @@ public class Intro : MonoBehaviour
         }
     }
 
-    public void StartGame()
+    public void StartClicked()
+    {
+        mainPanel.SetActive(false);
+        difficultyPanel.SetActive(true);
+    }
+
+    public void DifficultyEasyClicked()
+    {
+        if (!gameStarted)
+        {
+            Config config = GameObject.FindGameObjectWithTag("Config").GetComponent<Config>();
+            config.ChooseDifficultyEasy();
+            StartGame();
+        }
+        
+    }
+
+    public void DifficultyNormalClicked()
+    {
+        if (!gameStarted)
+        {
+            Config config = GameObject.FindGameObjectWithTag("Config").GetComponent<Config>();
+            config.ChooseDifficultyNormal();
+            StartGame();
+        }
+    }
+
+    public void DifficultyHardClicked()
+    {
+        if (!gameStarted)
+        {
+            Config config = GameObject.FindGameObjectWithTag("Config").GetComponent<Config>();
+            config.ChooseDifficultyHard();
+            StartGame();
+        }
+    }
+
+    void StartGame()
     {
         if (!gameStarted)
         {

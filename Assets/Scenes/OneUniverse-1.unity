@@ -2091,6 +2091,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4758372278653319435, guid: ff248523497a410408a50351b8de92b7, type: 3}
+      propertyPath: levelTimerObject
+      value: 
+      objectReference: {fileID: 11400000, guid: 602b0a28bacdc2649bcd0d22a6654324, type: 2}
     - target: {fileID: 5815638356146020833, guid: ff248523497a410408a50351b8de92b7, type: 3}
       propertyPath: m_Enabled
       value: 1
