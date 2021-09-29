@@ -299,9 +299,6 @@
             "m_Id": "8feba1baf8884f86b6b0a81c37d6cee8"
         },
         {
-            "m_Id": "2a909f28a8c24b31920ef37382b374fe"
-        },
-        {
             "m_Id": "b0531868cd5d4160b4746000c75727f5"
         },
         {
@@ -309,6 +306,9 @@
         },
         {
             "m_Id": "babdac20d6b342ac9c48f64d062501de"
+        },
+        {
+            "m_Id": "b0db7f570d214a4288cbc673a1a18167"
         }
     ],
     "m_GroupDatas": [
@@ -1533,9 +1533,6 @@
                 "m_Id": "8feba1baf8884f86b6b0a81c37d6cee8"
             },
             {
-                "m_Id": "2a909f28a8c24b31920ef37382b374fe"
-            },
-            {
                 "m_Id": "b0531868cd5d4160b4746000c75727f5"
             },
             {
@@ -1543,6 +1540,9 @@
             },
             {
                 "m_Id": "babdac20d6b342ac9c48f64d062501de"
+            },
+            {
+                "m_Id": "b0db7f570d214a4288cbc673a1a18167"
             }
         ]
     },
@@ -2890,39 +2890,6 @@
         "z": 0.0,
         "w": 0.0
     }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
-    "m_ObjectId": "2a909f28a8c24b31920ef37382b374fe",
-    "m_Group": {
-        "m_Id": ""
-    },
-    "m_Name": "SurfaceDescription.NormalTS",
-    "m_DrawState": {
-        "m_Expanded": true,
-        "m_Position": {
-            "serializedVersion": "2",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 0.0,
-            "height": 0.0
-        }
-    },
-    "m_Slots": [
-        {
-            "m_Id": "87f0965372f642b2b9853fc4b2f99465"
-        }
-    ],
-    "synonyms": [],
-    "m_Precision": 0,
-    "m_PreviewExpanded": true,
-    "m_PreviewMode": 0,
-    "m_CustomColors": {
-        "m_SerializableColors": []
-    },
-    "m_SerializedDescriptor": "SurfaceDescription.NormalTS"
 }
 
 {
@@ -5422,6 +5389,30 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.NormalMaterialSlot",
+    "m_ObjectId": "6b4714ae88194080aa67f96b23636005",
+    "m_Id": 0,
+    "m_DisplayName": "Normal (Tangent Space)",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "NormalTS",
+    "m_StageCapability": 2,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_Labels": [],
+    "m_Space": 3
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "6d5dd0d6ad5b460d93180fc1c7123482",
     "m_Id": 0,
@@ -6208,30 +6199,6 @@
         "z": 0.0,
         "w": 0.0
     }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.NormalMaterialSlot",
-    "m_ObjectId": "87f0965372f642b2b9853fc4b2f99465",
-    "m_Id": 0,
-    "m_DisplayName": "Normal (Tangent Space)",
-    "m_SlotType": 0,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "NormalTS",
-    "m_StageCapability": 2,
-    "m_Value": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_DefaultValue": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-    },
-    "m_Labels": [],
-    "m_Space": 3
 }
 
 {
@@ -7438,6 +7405,39 @@
     "m_Property": {
         "m_Id": "2c986ba53d104f4b9a1ddb6e449eda50"
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
+    "m_ObjectId": "b0db7f570d214a4288cbc673a1a18167",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "SurfaceDescription.NormalTS",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": 0.0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "6b4714ae88194080aa67f96b23636005"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SerializedDescriptor": "SurfaceDescription.NormalTS"
 }
 
 {

@@ -16,6 +16,8 @@ public class Backpack : MonoBehaviour
 
     //int initialLayer;
 
+    // TODO: Make dropped backpacks that are on top of another player's backpack preserve momentum of that player, just like players do 
+
     private void Awake()
     {
         rewindTarget.CreateNewTimePoint += CreateNewTimePoint;
@@ -103,9 +105,11 @@ public class Backpack : MonoBehaviour
     void CreateRigidbody()
     {
         rb = gameObject.AddComponent<Rigidbody>();
-        rb.mass = 5.0f;
+        rb.mass = 10.0f;
+        /*
         rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ
             | RigidbodyConstraints.FreezeRotation;
+        */
     }
 
     void DestroyRigidbody()
