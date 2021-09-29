@@ -34,12 +34,17 @@ public class RewindController : MonoBehaviour
 
         totalSteps = (int)(levelTimers.LevelDuration * (1 / Time.fixedDeltaTime));
 
-        rewindTargets = new List<RewindTarget>();
+        //rewindTargets = new List<RewindTarget>();
 
+        rewindTargets = new List<RewindTarget>(GameObject.FindObjectsOfType<RewindTarget>());
+
+        /*
         foreach (Character c in characters)
         {
             rewindTargets.Add(c.gameObject.GetComponent<RewindTarget>());
         }
+        */
+
         foreach (RewindTarget rt in rewindTargets)
         {
             rt.SetRewindParameters(totalSteps, levelTimers.LevelDuration / levelTimers.RewindSpeed);

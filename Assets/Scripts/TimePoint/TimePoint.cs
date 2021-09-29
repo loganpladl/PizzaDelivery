@@ -14,4 +14,11 @@ public class TimePoint
         this.rotation = rotation;
         this.cameraVerticalRotation = cameraVerticalRotation;
     }
+
+    public TimePoint(Vector3 position, Quaternion rotation)
+    {
+        this.position = position;
+        this.rotation = rotation;
+        this.cameraVerticalRotation = 0; // Irrelevant. Ideally would not store this.
+    }
 }

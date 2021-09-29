@@ -59,6 +59,14 @@ public class PlayerMovement : MonoBehaviour
     float extraJumpTimer;
     bool jumped = false;
 
+    [SerializeField] Collider playerCollider;
+    [SerializeField] Collider backpackCollider;
+
+    bool backpackGrounded = false;
+
+    // Flag used to avoid double jump glitch
+    bool justJumped = false;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -129,6 +137,7 @@ public class PlayerMovement : MonoBehaviour
         newVelocity.z = Mathf.MoveTowards(newVelocity.z, adjustedTargetVelocity.z, maxSpeedDelta);
         rigidBody.velocity = newVelocity;
 
+
         if (grounded)
         {
             extraJumpTimer = extraJumpWindow;
@@ -138,14 +147,19 @@ public class PlayerMovement : MonoBehaviour
         {
             extraJumpTimer -= Time.fixedDeltaTime;
         }
-        
 
+        // Reset flag
+        justJumped = false;
+        
         if (CanJump() && tryJump)
         {
             jumped = true;
             rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
             character.JumpSound();
             animator.SetTrigger("Jumped");
+            
+            // Flag that prevents the player from being marked as grounded on the same timestep as a jump
+            justJumped = true;
         }
 
         // Manual gravity for more control
@@ -153,6 +167,7 @@ public class PlayerMovement : MonoBehaviour
         rigidBody.AddForce(gravityVector * Time.deltaTime, ForceMode.VelocityChange);
 
         grounded = false;
+        backpackGrounded = false;
         tryJump = false;
     }
 
@@ -183,6 +198,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (collision.collider.CompareTag("BackpackFloor"))
         {
+            // Avoid null reference if collided backpack is dropped
+            if (collision.rigidbody == null)
+            {
+                return;
+            }
+
             // TODO: This is triggering when players just bump into each other for some reason.
             // I'll try fixing it by checking the normal, but this shouldn't be necessary.
             // Also should maybe switch these to triggers and just use the backpack for collision
@@ -219,13 +240,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
+        
         EvaluateGroundCollision(collision);
 
         // TODO: This is triggering when players just bump into each other for some reason.
         // I'll try fixing it by checking the normal, but this shouldn't be necessary.
         if (collision.collider.CompareTag("BackpackFloor"))
         {
+            // Avoid null reference if collided backpack is dropped
+            if (collision.rigidbody == null)
+            {
+                return;
+            }
+
             Vector3 normal = collision.GetContact(0).normal;
+
             if (normal.y >= 0.9f)
             {
                 //attachedWorldPosition = rigidBody.position;
@@ -248,10 +277,31 @@ public class PlayerMovement : MonoBehaviour
 
     private void EvaluateGroundCollision(Collision collision)
     {
+        // Delay checking for ground collision if this is the same timestep that the player jumped.
+        // This avoids a double jump glitch.
+        if (justJumped == true)
+        {
+            return;
+        }
+
         for (int i = 0; i < collision.contactCount; i++)
         {
-            Vector3 normal = collision.GetContact(i).normal;
-            grounded |= normal.y >= 0.9f;
+            Collider collider = collision.GetContact(i).thisCollider;
+
+            // If the player's main collider is touching the ground
+            if (collider == playerCollider)
+            {
+                Vector3 normal = collision.GetContact(i).normal;
+                grounded |= normal.y >= 0.9f;
+            }
+
+            // If the player's backpack is touching the ground
+            if (collider == backpackCollider)
+            {
+                
+                Vector3 normal = collision.GetContact(i).normal;
+                backpackGrounded |= normal.y >= 0.9f;
+            }
         }
     }
 
@@ -277,5 +327,10 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGrounded()
     {
         return grounded;
+    }
+
+    public bool IsHanging()
+    {
+        return !grounded && backpackGrounded;
     }
 }

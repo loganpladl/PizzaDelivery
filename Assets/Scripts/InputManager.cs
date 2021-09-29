@@ -186,6 +186,12 @@ public class InputManager : MonoBehaviour
             CommandPattern.Command jump = new CommandPattern.Jump(activeCharacter);
             commands[activeCharacter].Add(new KeyValuePair<CommandPattern.Command, int>(jump, currentFixedStep));
         }
+
+        if (Input.GetButtonDown("Interact"))
+        {
+            CommandPattern.Command interact = new CommandPattern.Interact(activeCharacter);
+            commands[activeCharacter].Add(new KeyValuePair<CommandPattern.Command, int>(interact, currentFixedStep));
+        }
     }
 
     void Playback()

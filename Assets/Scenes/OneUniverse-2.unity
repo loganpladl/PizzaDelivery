@@ -548,9 +548,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerBlue
       objectReference: {fileID: 0}
+    - target: {fileID: 5167823024849020071, guid: 7969fb85a69eb684ea21fc039d0620ef, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5233984023768436161, guid: 7969fb85a69eb684ea21fc039d0620ef, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5233984025097102778, guid: 7969fb85a69eb684ea21fc039d0620ef, type: 3}
       propertyPath: m_Priority
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 7225911785547120593, guid: 7969fb85a69eb684ea21fc039d0620ef, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8500093849227314980, guid: 7969fb85a69eb684ea21fc039d0620ef, type: 3}
       propertyPath: m_RootOrder

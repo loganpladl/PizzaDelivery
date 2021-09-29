@@ -58,4 +58,17 @@ namespace CommandPattern
             character.TryJump();
         }
     }
+
+    public class Interact : Command
+    {
+        public Interact(Character character) : base(character)
+        {
+
+        }
+
+        public override void Execute()
+        {
+            character.TryInteract();
+        }
+    }
 }

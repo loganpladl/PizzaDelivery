@@ -84,8 +84,10 @@ public class RewindTarget : MonoBehaviour
         rewindTimer = maxRewindDuration - rewindDuration;
 
         
-
-        OnRewindStart();
+        if (OnRewindStart != null)
+        {
+            OnRewindStart();
+        }
     }
 
     public void StopRewind()
@@ -95,8 +97,10 @@ public class RewindTarget : MonoBehaviour
         transform.rotation = initialPoint.rotation;
 
         // Call event with intiail time point to allow for for custom reset behavior
-        OnRewindEnded(initialPoint);
-
+        if (OnRewindEnded != null)
+        {
+            OnRewindEnded(initialPoint);
+        }
 
         rewinding = false;
 
@@ -127,7 +131,10 @@ public class RewindTarget : MonoBehaviour
         transform.rotation = timePoint.rotation;
         
 
-        Rewinding(frac, timePoint);
+        if (Rewinding != null)
+        {
+            Rewinding(frac, timePoint);
+        }
     }
 
     private void RecordStep()

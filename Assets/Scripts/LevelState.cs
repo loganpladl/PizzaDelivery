@@ -23,6 +23,11 @@ public class LevelState : MonoBehaviour
 
     [SerializeField]
     GameObject knockPromptUI;
+    [SerializeField]
+    GameObject pickupPromptUI;
+
+    [SerializeField]
+    GameObject pizzaDroppedUI;
 
     [SerializeField]
     GameObject pizzaDeliveredUI;
@@ -148,7 +153,6 @@ public class LevelState : MonoBehaviour
             }
             else if (!universeShift.ChoosingUniverse && !universeShift.UniverseShifting)
             {
-                Debug.Log("test");
                 if (levelTimers.IsRewindTimerOver())
                 {
                     rewindController.StopRewind();
@@ -331,6 +335,16 @@ public class LevelState : MonoBehaviour
         knockPromptUI.SetActive(false);
     }
 
+    public void DisplayPickupPrompt()
+    {
+        pickupPromptUI.SetActive(true);
+    }
+
+    public void HidePickupPrompt()
+    {
+        pickupPromptUI.SetActive(false);
+    }
+
     public bool IsLevelStarted()
     {
         return levelStarted;
@@ -379,5 +393,17 @@ public class LevelState : MonoBehaviour
         ShowPlayIconAndSound();
 
         StartLoop();
+    }
+
+    public void PizzaDropped()
+    {
+        StartCoroutine(ShowPizzaDroppedUI());
+    }
+
+    IEnumerator ShowPizzaDroppedUI()
+    {
+        pizzaDroppedUI.SetActive(true);
+        yield return new WaitForSeconds(1.0f);
+        pizzaDroppedUI.SetActive(false);
     }
 }

@@ -37,12 +37,18 @@ public class MouseLook : MonoBehaviour
     [SerializeField]
     float rotationSmoothing = 1;
 
-    bool enableRaycasting = false;
+    bool enableRaycasting = true;
 
     // Accumulate horizontal rotation from input manager. Reset when updating rigidbody rotation.
     float CameraHorizontalRotation = 0.0f;
 
     bool enable = true;
+
+    public delegate void TryBackpackPickup();
+    public TryBackpackPickup tryBackpackPickup;
+    bool wearingBackpack = true;
+
+    bool tryInteract = false;
 
     // Start is called before the first frame update
     void Start()
@@ -71,10 +77,12 @@ public class MouseLook : MonoBehaviour
         Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
         gameObject.transform.localRotation = Quaternion.Euler(newEuler);
 
+        /*
         if (enable && enableRaycasting)
         {
             Raycast();
         }
+        */
 
         vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
         vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing * Time.deltaTime);
@@ -87,7 +95,14 @@ public class MouseLook : MonoBehaviour
             Vector3 eulerHorizontal = new Vector3(0.0f, CameraHorizontalRotation, 0.0f);
             CameraHorizontalRotation = 0;
             PlayerRigidbody.MoveRotation(PlayerRigidbody.rotation * Quaternion.Euler(eulerHorizontal));
+
+            if (enableRaycasting)
+            {
+                Raycast();
+            }
         }
+
+        tryInteract = false;
     }
 
     public void UpdateLook(float xVelocity, float yVelocity)
@@ -124,25 +139,64 @@ public class MouseLook : MonoBehaviour
     {
         RaycastHit hit;
 
+        Debug.DrawRay(transform.position, transform.forward);
+
+        // Only show prompts if active TODO: Could clean up, lots of IsCameraActive if statements
         if (Physics.Raycast(transform.position, transform.forward, out hit, rayCastLength))
         {
             if (hit.collider.CompareTag("Door"))
             {
-                levelState.DisplayKnockPrompt();
+                if (IsCameraActive())
+                {
+                    levelState.DisplayKnockPrompt();
+                }
 
-                if (Input.GetButtonDown("Interact"))
+                if (Interacting())
                 {
                     levelState.Victory();
                 }
+
+                return; // avoid checking for backpack collision if we already found door collision
             }
             else
             {
-                levelState.HideKnockPrompt();
+                if (IsCameraActive())
+                {
+                    levelState.HideKnockPrompt();
+                }
+            }
+
+            if (hit.collider.CompareTag("Backpack"))
+            {
+                if (!wearingBackpack)
+                {
+                    if (IsCameraActive())
+                    {
+                        levelState.DisplayPickupPrompt();
+                    }
+
+                    if (Interacting())
+                    {
+                        tryBackpackPickup();
+                    }
+                }
+            }
+
+            else
+            {
+                if (IsCameraActive())
+                {
+                    levelState.HidePickupPrompt();
+                }
             }
         }
         else
         {
-            levelState.HideKnockPrompt();
+            if (IsCameraActive())
+            {
+                levelState.HideKnockPrompt();
+                levelState.HidePickupPrompt();
+            }
         }
     }
 
@@ -164,5 +218,30 @@ public class MouseLook : MonoBehaviour
     public void DisableRaycasting()
     {
         enableRaycasting = false;
+    }
+
+    bool IsCameraActive()
+    {
+        return vcam.Priority == 1;
+    }
+
+    public void SetWearingBackpack()
+    {
+        wearingBackpack = true;
+    }
+
+    public void SetNotWearingBackpack()
+    {
+        wearingBackpack = false;
+    }
+
+    public void TryInteract()
+    {
+        tryInteract = true;
+    }
+
+    bool Interacting()
+    {
+        return tryInteract;
     }
 }
