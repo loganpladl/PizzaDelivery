@@ -44,7 +44,7 @@ public class MouseLook : MonoBehaviour
 
     bool enable = true;
 
-    public delegate void TryBackpackPickup();
+    public delegate void TryBackpackPickup(Backpack backpack);
     public TryBackpackPickup tryBackpackPickup;
     bool wearingBackpack = true;
 
@@ -177,7 +177,7 @@ public class MouseLook : MonoBehaviour
 
                     if (Interacting())
                     {
-                        tryBackpackPickup();
+                        tryBackpackPickup(hit.collider.gameObject.GetComponentInParent<Backpack>());
                     }
                 }
             }

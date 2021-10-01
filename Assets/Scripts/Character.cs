@@ -16,11 +16,8 @@ public class Character : MonoBehaviour
     [SerializeField]
     SkinnedMeshRenderer characterMesh;
 
-    [SerializeField]
-    MeshRenderer characterBackpackMesh;
-
-    [SerializeField]
-    GameObject backpackRoot;
+    //[SerializeField]
+    //GameObject backpackRoot;
     Transform backpackInitialParent;
     bool wearingBackpack = true;
     Vector3 backpackInitialRelativePosition;
@@ -65,7 +62,9 @@ public class Character : MonoBehaviour
     Vector3 initialRigidbodyPosition;
     Quaternion initialRigidbodyRotation;
 
-    [SerializeField] Backpack backpack;
+    [SerializeField] Backpack initialBackpack;
+    Backpack currentBackpack;
+    MeshRenderer currentBackpackMesh;
 
     private void Awake()
     {
@@ -80,9 +79,9 @@ public class Character : MonoBehaviour
         rewindTarget.CreateNewTimePoint += CreateNewTimePoint;
         rewindTarget.Rewinding += RewindStep;
 
-        backpackInitialParent = backpackRoot.transform.parent;
-        backpackInitialRelativePosition = backpackRoot.transform.localPosition;
-        backpackInitialRelativeRotation = backpackRoot.transform.localRotation;
+        backpackInitialParent = initialBackpack.transform.parent;
+        backpackInitialRelativePosition = initialBackpack.transform.localPosition;
+        backpackInitialRelativeRotation = initialBackpack.transform.localRotation;
     }
 
     // Start is called before the first frame update
@@ -93,6 +92,10 @@ public class Character : MonoBehaviour
         inAirTimer = secondsInAirForLandSound;
 
         mouseLook.tryBackpackPickup = TryBackpackPickup;
+
+        currentBackpack = initialBackpack;
+
+
     }
 
     // Update is called once per frame
@@ -130,34 +133,47 @@ public class Character : MonoBehaviour
 
     private void DropBackpack()
     {
+        if (!wearingBackpack)
+        {
+            return;
+        }
+
+
         wearingBackpack = false;
-        backpackRoot.transform.SetParent(transform.root);
+        currentBackpack.transform.SetParent(transform.root);
+
+        currentBackpack.Drop();
+        movementComponent.DroppedBackpack();
 
         if (isActiveCharacter)
         {
-            characterBackpackMesh.enabled = true;
-
             // Show pizza dropped message only if this is the active character
             levelState.PizzaDropped();
+
+            currentBackpack.SetNotWornByActiveCharacter();
         }
 
-        backpack.Drop();
         mouseLook.SetNotWearingBackpack();
     }
 
-    private void PickupBackpack()
+    private void PickupBackpack(Backpack backpack)
     {
-        wearingBackpack = true;
-        backpackRoot.transform.SetParent(backpackInitialParent);
-        backpackRoot.transform.localPosition = backpackInitialRelativePosition;
-        backpackRoot.transform.localRotation = backpackInitialRelativeRotation;
+        currentBackpack = backpack;
 
+        wearingBackpack = true;
+
+        currentBackpack.transform.SetParent(backpackInitialParent);
+        currentBackpack.transform.localPosition = backpackInitialRelativePosition;
+        currentBackpack.transform.localRotation = backpackInitialRelativeRotation;
+
+        currentBackpack.Pickup();
+        movementComponent.PickedUpBackpack(currentBackpack);
+        
         if (isActiveCharacter)
         {
-            characterBackpackMesh.enabled = false;
+            currentBackpack.SetWornByActiveCharacter();
         }
 
-        backpack.Pickup();
         mouseLook.SetWearingBackpack();
     }
 
@@ -183,10 +199,14 @@ public class Character : MonoBehaviour
         mouseLook.Enable();
         animatorComponent.StopPlayback();
 
+        /*
         if (!wearingBackpack)
         {
-            PickupBackpack();
+            PickupBackpack(initialBackpack);
         }
+        */
+
+        PickupBackpack(initialBackpack);
     }
 
     void RewindStep(float progress, TimePoint timePoint)
@@ -228,7 +248,7 @@ public class Character : MonoBehaviour
         animatorComponent.StartRecording(0);
 
         rewindTarget.Enable();
-        backpack.EnableRewindTarget();
+        initialBackpack.EnableRewindTarget();
 
         // Trying to reset rigidbody position and rotation at the start of each loop for determinism
         rigidbodyComponent.position = initialRigidbodyPosition;
@@ -245,7 +265,7 @@ public class Character : MonoBehaviour
         animatorComponent.StopRecording();
 
         rewindTarget.Disable();
-        backpack.DisableRewindTarget();
+        initialBackpack.DisableRewindTarget();
     }
 
     public void SetActiveCharacter()
@@ -253,9 +273,8 @@ public class Character : MonoBehaviour
         isActiveCharacter = true;
 
         characterMesh.enabled = false;
-        characterBackpackMesh.enabled = false;
 
-        backpack.SetActiveCharacter();
+        initialBackpack.SetWornByActiveCharacter();
 
         mouseLook.SetCameraActive();
         //mouseLook.EnableRaycasting();
@@ -266,9 +285,8 @@ public class Character : MonoBehaviour
         isActiveCharacter = false;
 
         characterMesh.enabled = true;
-        characterBackpackMesh.enabled = true;
 
-        backpack.SetNotActiveCharacter();
+        initialBackpack.SetNotWornByActiveCharacter();
 
         mouseLook.SetCameraInactive();
         //mouseLook.DisableRaycasting();
@@ -319,8 +337,8 @@ public class Character : MonoBehaviour
         //footstepAudioSource.PlayOneShot(landSound);
     }
 
-    public void TryBackpackPickup()
+    public void TryBackpackPickup(Backpack backpack)
     {
-        PickupBackpack();
+        PickupBackpack(backpack);
     }
 }

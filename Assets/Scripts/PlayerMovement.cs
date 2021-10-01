@@ -60,17 +60,24 @@ public class PlayerMovement : MonoBehaviour
     bool jumped = false;
 
     [SerializeField] Collider playerCollider;
-    [SerializeField] Collider backpackCollider;
+
+    [SerializeField] Collider initialBackpackCollider;
+
+    Collider currentBackpackCollider;
 
     bool backpackGrounded = false;
 
     // Flag used to avoid double jump glitch
     bool justJumped = false;
 
+    bool wearingBackpack = true;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
         character = GetComponent<Character>();
+
+        currentBackpackCollider = initialBackpackCollider;
     }
 
     // Start is called before the first frame update
@@ -296,7 +303,7 @@ public class PlayerMovement : MonoBehaviour
             }
 
             // If the player's backpack is touching the ground
-            if (collider == backpackCollider)
+            if (collider == currentBackpackCollider)
             {
                 
                 Vector3 normal = collision.GetContact(i).normal;
@@ -331,6 +338,18 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsHanging()
     {
-        return !grounded && backpackGrounded;
+        return !grounded && backpackGrounded && wearingBackpack;
+    }
+
+    public void DroppedBackpack()
+    {
+        wearingBackpack = false;
+    }
+
+    public void PickedUpBackpack(Backpack backpack)
+    {
+        wearingBackpack = true;
+
+        currentBackpackCollider = backpack.gameObject.GetComponentInChildren<Collider>();
     }
 }

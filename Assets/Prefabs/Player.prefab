@@ -120,7 +120,7 @@ MonoBehaviour:
   animationBlendDelta: 5
   extraJumpWindow: 0.2
   playerCollider: {fileID: 1983754026573204463}
-  backpackCollider: {fileID: 1482430651743986313}
+  initialBackpackCollider: {fileID: 1482430651743986313}
 --- !u!114 &6507512838311207817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,8 +136,6 @@ MonoBehaviour:
   animatorComponent: {fileID: 2680029289884544477}
   mouseLook: {fileID: 0}
   characterMesh: {fileID: 4424658025145461858}
-  characterBackpackMesh: {fileID: 3198129095550146602}
-  backpackRoot: {fileID: 5743638481290732229}
   footstepSounds:
   - {fileID: 8300000, guid: 601b5a3da987b1a4f829765c028b2761, type: 3}
   - {fileID: 8300000, guid: a470584463b4f2840ac76754e8a1e3a0, type: 3}
@@ -150,7 +148,7 @@ MonoBehaviour:
   rewindTarget: {fileID: 275201410144629355}
   footstepSoundIncrement: 0.1
   secondsInAirForLandSound: 0.25
-  backpack: {fileID: 5073917086108908093}
+  initialBackpack: {fileID: 5073917086108908093}
 --- !u!114 &275201410144629355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -489,7 +487,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rewindTarget: {fileID: 2076946957940708074}
-  backpackMeshRenderer: {fileID: 3198129095550146602}
+  meshRenderer: {fileID: 3198129095550146602}
 --- !u!1 &6500421765231833079
 GameObject:
   m_ObjectHideFlags: 0

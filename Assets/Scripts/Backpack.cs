@@ -5,14 +5,15 @@ using UnityEngine;
 public class Backpack : MonoBehaviour
 {
     [SerializeField] RewindTarget rewindTarget;
-    bool wearingBackpack = true;
-
-    [SerializeField] MeshRenderer backpackMeshRenderer;
+    bool beingWorn = true;
 
     // Needs to know whether this backpack belongs to the active character to know whether to disable mesh renderer when rewinding
-    bool activeCharacter;
+    bool beingWornByActiveCharacter;
 
     Rigidbody rb;
+
+    [SerializeField]
+    MeshRenderer meshRenderer;
 
     //int initialLayer;
 
@@ -24,16 +25,16 @@ public class Backpack : MonoBehaviour
         rewindTarget.Rewinding += RewindStep;
         //rb = GetComponent<Rigidbody>();
 
-        
+
 
         //initialLayer = this.gameObject.layer;
     }
 
     TimePoint CreateNewTimePoint()
     {
-        // Store wearing backpack is being worn in 3rd timepoint parameter
+        // Store whether the active character is wearing this backpack as 3rd TimePoint parameter
         float wearingFlag;
-        if (wearingBackpack)
+        if (beingWornByActiveCharacter)
         {
             wearingFlag = 1;
         }
@@ -57,7 +58,7 @@ public class Backpack : MonoBehaviour
 
     public void Drop()
     {
-        wearingBackpack = false;
+        beingWorn = false;
         //rb.isKinematic = false;
         //rb.detectCollisions = true;
 
@@ -67,7 +68,7 @@ public class Backpack : MonoBehaviour
 
     public void Pickup()
     {
-        wearingBackpack = true;
+        beingWorn = true;
         //rb.isKinematic = true;
         //rb.detectCollisions = false;
 
@@ -75,19 +76,24 @@ public class Backpack : MonoBehaviour
         DestroyRigidbody();
     }
 
-    public void SetActiveCharacter()
+    public void SetWornByActiveCharacter()
     {
-        activeCharacter = true;
+        beingWornByActiveCharacter = true;
+
+        meshRenderer.enabled = false;
     }
 
-    public void SetNotActiveCharacter()
+    public void SetNotWornByActiveCharacter()
     {
-        activeCharacter = false;
+        beingWornByActiveCharacter = false;
+
+        meshRenderer.enabled = true;
     }
 
     void RewindStep(float progress, TimePoint timePoint)
     {
-        if (activeCharacter)
+        /*
+        if (beingWornByActiveCharacter)
         {
             // TODO: Again, this parameter is still named cameraVerticalRotation, but I should rename to a context-dependent float
             if (timePoint.cameraVerticalRotation == 0)
@@ -100,6 +106,18 @@ public class Backpack : MonoBehaviour
                 backpackMeshRenderer.enabled = false;
             }
         }
+        */
+
+        // Disable the mesh renderer while rewinding only if the active character was wearing this backpack at this timestep
+        if (timePoint.cameraVerticalRotation == 0)
+        {
+            meshRenderer.enabled = true;
+        }
+        else
+        {
+            meshRenderer.enabled = false;
+        }
+
     }
 
     void CreateRigidbody()
