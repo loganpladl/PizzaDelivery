@@ -116,6 +116,7 @@ MonoBehaviour:
   maxAirAcceleration: 25
   gravity: 10
   jumpSpeed: 7
+  jumpSpeedWithoutBackpack: 8
   animator: {fileID: 2680029289884544477}
   animationBlendDelta: 5
   extraJumpWindow: 0.2
@@ -149,6 +150,7 @@ MonoBehaviour:
   footstepSoundIncrement: 0.1
   secondsInAirForLandSound: 0.25
   initialBackpack: {fileID: 5073917086108908093}
+  hangingTimeLimit: 0.3
 --- !u!114 &275201410144629355
 MonoBehaviour:
   m_ObjectHideFlags: 0

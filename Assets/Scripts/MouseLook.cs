@@ -50,6 +50,25 @@ public class MouseLook : MonoBehaviour
 
     bool tryInteract = false;
 
+    // Cannot look while hanging. Set by Character component.
+    bool canLook = true;
+
+    Quaternion startHangingLocalRotation;
+
+    // How much to divide the view angle by when hanging
+    [SerializeField] float hangingViewAngleDivisor = 1.5f;
+
+    float hangingHorizontalCameraRotation = 0;
+
+    // Apply extra smoothing when correcting after hanging
+    [SerializeField] float hangingSmoothDuration = .5f;
+    float hangingSmoothTimer = 0;
+
+    [SerializeField] float hangingSmoothDivisor = 5.0f;
+
+    Vector3 initialLocalPosition;
+    Quaternion initialLocalRotation;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +76,11 @@ public class MouseLook : MonoBehaviour
         levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
 
         vcam.transform.position = transform.position;
+
+        startHangingLocalRotation = gameObject.transform.localRotation;
+
+        initialLocalPosition = transform.localPosition;
+        initialLocalRotation = transform.localRotation;
     }
 
     // Update is called once per frame
@@ -68,33 +92,79 @@ public class MouseLook : MonoBehaviour
             return;
         }
 
-        transform.position = targetTransform.transform.position;
-        transform.rotation = targetTransform.transform.rotation;
-
-
-        CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
-        Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
-        Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
-        gameObject.transform.localRotation = Quaternion.Euler(newEuler);
-
-        /*
-        if (enable && enableRaycasting)
+        // Only smooth if enabled since otherwise we're rewinding and no smoothing is preferred
+        if (enable)
         {
-            Raycast();
-        }
-        */
+            //vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
+            vcam.transform.position = transform.position * .15f + vcam.transform.position * .85f;
 
-        vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
-        vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing * Time.deltaTime);
+            if (hangingSmoothTimer <= 0)
+            {
+                vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing * Time.deltaTime);
+            }
+            else
+            {
+                // Apply extra smoothing while hanging and briefly after, to mask camera snapping
+                vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing / hangingSmoothDivisor  * Time.deltaTime);
+                hangingSmoothTimer -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            vcam.transform.position = transform.position;
+            vcam.transform.rotation = transform.rotation;
+        }
     }
 
     private void FixedUpdate()
     {
+        if (canLook)
+        {
+            transform.position = targetTransform.transform.position;
+            transform.rotation = targetTransform.transform.rotation;
+
+            CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
+            Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
+            //Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
+            Vector3 newEuler = gameObject.transform.localEulerAngles + eulerVertical;
+            gameObject.transform.localRotation = Quaternion.Euler(newEuler);
+        }
+
+        // TODO: Get rid of copy paste
+        // Tighter vertical view angle if hanging
+        else
+        {
+            transform.position = targetTransform.transform.position;
+            transform.rotation = targetTransform.transform.rotation;
+
+            CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
+            CameraVerticalRotation /= hangingViewAngleDivisor;
+
+            Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
+            //Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
+            Vector3 newEuler = gameObject.transform.localEulerAngles + eulerVertical;
+            gameObject.transform.localRotation = Quaternion.Euler(newEuler);
+        }
+
+
         if (enable)
         {
             Vector3 eulerHorizontal = new Vector3(0.0f, CameraHorizontalRotation, 0.0f);
             CameraHorizontalRotation = 0;
-            PlayerRigidbody.MoveRotation(PlayerRigidbody.rotation * Quaternion.Euler(eulerHorizontal));
+
+            if (canLook)
+            {
+                PlayerRigidbody.MoveRotation(PlayerRigidbody.rotation * Quaternion.Euler(eulerHorizontal));
+            }
+            else
+            {
+                hangingHorizontalCameraRotation += eulerHorizontal.y;
+                hangingHorizontalCameraRotation /= hangingViewAngleDivisor;
+                eulerHorizontal = new Vector3(0.0f, hangingHorizontalCameraRotation, 0.0f);
+
+                Vector3 newEuler = gameObject.transform.localEulerAngles + eulerHorizontal;
+                gameObject.transform.localRotation = Quaternion.Euler(newEuler);
+            }
 
             if (enableRaycasting)
             {
@@ -128,33 +198,50 @@ public class MouseLook : MonoBehaviour
     public void Enable()
     {
         enable = true;
+
+        transform.localPosition = initialLocalPosition;
+        transform.localRotation = initialLocalRotation;
     }
 
     public void Disable()
     {
         enable = false;
+
+        levelState.HideKnockPrompt();
+        levelState.HidePickupPrompt();
+        levelState.HideCantDeliverPrompt();
     }
 
     public void Raycast()
     {
         RaycastHit hit;
 
-        Debug.DrawRay(transform.position, transform.forward);
-
         // Only show prompts if active TODO: Could clean up, lots of IsCameraActive if statements
-        if (Physics.Raycast(transform.position, transform.forward, out hit, rayCastLength))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, rayCastLength, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.CompareTag("Door"))
             {
-                if (IsCameraActive())
+                // Can only knock and complete level if wearing a backpack
+                if (wearingBackpack)
                 {
-                    levelState.DisplayKnockPrompt();
-                }
+                    if (IsCameraActive())
+                    {
+                        levelState.DisplayKnockPrompt();
+                    }
 
-                if (Interacting())
-                {
-                    levelState.Victory();
+                    if (Interacting())
+                    {
+                        levelState.Victory();
+                    }
                 }
+                else
+                {
+                    if (IsCameraActive())
+                    {
+                        levelState.DisplayCantDeliverPrompt();
+                    }
+                }
+                
 
                 return; // avoid checking for backpack collision if we already found door collision
             }
@@ -163,10 +250,11 @@ public class MouseLook : MonoBehaviour
                 if (IsCameraActive())
                 {
                     levelState.HideKnockPrompt();
+                    levelState.HideCantDeliverPrompt();
                 }
             }
 
-            if (hit.collider.CompareTag("Backpack"))
+            if (hit.collider.CompareTag("Backpack") || hit.collider.CompareTag("BackpackFloor"))
             {
                 if (!wearingBackpack)
                 {
@@ -196,6 +284,7 @@ public class MouseLook : MonoBehaviour
             {
                 levelState.HideKnockPrompt();
                 levelState.HidePickupPrompt();
+                levelState.HideCantDeliverPrompt();
             }
         }
     }
@@ -243,5 +332,26 @@ public class MouseLook : MonoBehaviour
     bool Interacting()
     {
         return tryInteract;
+    }
+
+    public void SetCanLook()
+    {
+        hangingSmoothTimer = hangingSmoothDuration;
+
+        transform.localRotation = Quaternion.Euler(new Vector3(transform.localEulerAngles.x, startHangingLocalRotation.y, 0));
+        canLook = true;
+
+        hangingHorizontalCameraRotation = 0;
+    }
+
+    public void SetCannotLook()
+    {
+        startHangingLocalRotation = transform.localRotation;
+        canLook = false;
+    }
+
+    public bool CanLook()
+    {
+        return canLook;
     }
 }

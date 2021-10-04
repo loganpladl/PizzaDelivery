@@ -18,6 +18,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     float jumpSpeed = 15.0f;
+    [SerializeField]
+    float jumpSpeedWithoutBackpack = 30.0f;
 
     [SerializeField]
     Animator animator;
@@ -72,6 +74,12 @@ public class PlayerMovement : MonoBehaviour
 
     bool wearingBackpack = true;
 
+    // Cannot move while hanging. Set by Character component
+    bool canMove = true;
+
+    // Force from magnet to apply next FixedUpdate
+    float magnetForce = 0;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -124,7 +132,17 @@ public class PlayerMovement : MonoBehaviour
     void Move()
     {
         // Adjusted target velocity is used to add the velocity of a player we're standing on
-        Vector3 adjustedTargetVelocity = targetVelocity;
+        Vector3 adjustedTargetVelocity;
+        if (canMove)
+        {
+            adjustedTargetVelocity = targetVelocity;
+        }
+        else
+        {
+            // Set target velocity to zero if hanging
+            adjustedTargetVelocity = Vector3.zero;
+        }
+        
         if (onPlayerBackpack)
         {
             //rigidBody.velocity = new Vector3(belowPlayersVelocity.x, rigidBody.velocity.y, belowPlayersVelocity.z);
@@ -139,6 +157,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 newVelocity = rigidBody.velocity;
         float acceleration = grounded ? maxAcceleration : maxAirAcceleration;
         float maxSpeedDelta = acceleration * Time.deltaTime;
+
+        
 
         newVelocity.x = Mathf.MoveTowards(newVelocity.x, adjustedTargetVelocity.x, maxSpeedDelta);
         newVelocity.z = Mathf.MoveTowards(newVelocity.z, adjustedTargetVelocity.z, maxSpeedDelta);
@@ -158,10 +178,20 @@ public class PlayerMovement : MonoBehaviour
         // Reset flag
         justJumped = false;
         
+
         if (CanJump() && tryJump)
         {
             jumped = true;
-            rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
+            // Jump higher if not wearing backpack
+            if (wearingBackpack)
+            {
+                rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeed, rigidBody.velocity.z);
+            }
+            else
+            {
+                rigidBody.velocity = new Vector3(rigidBody.velocity.x, jumpSpeedWithoutBackpack, rigidBody.velocity.z);
+            }
+            
             character.JumpSound();
             animator.SetTrigger("Jumped");
             
@@ -171,11 +201,16 @@ public class PlayerMovement : MonoBehaviour
 
         // Manual gravity for more control
         Vector3 gravityVector = new Vector3(0, -gravity * rigidBody.mass, 0);
-        rigidBody.AddForce(gravityVector * Time.deltaTime, ForceMode.VelocityChange);
+        rigidBody.AddForce(gravityVector * Time.fixedDeltaTime, ForceMode.VelocityChange);
+
+        // Add magnet force
+        Vector3 magnetVector = new Vector3(0, -magnetForce * rigidBody.mass, 0);
+        rigidBody.AddForce(magnetVector * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
         grounded = false;
         backpackGrounded = false;
         tryJump = false;
+        magnetForce = 0;
     }
 
     private bool CanJump()
@@ -351,5 +386,35 @@ public class PlayerMovement : MonoBehaviour
         wearingBackpack = true;
 
         currentBackpackCollider = backpack.gameObject.GetComponentInChildren<Collider>();
+    }
+
+    public void SetCanMove()
+    {
+        canMove = true;
+    }
+
+    public void SetCannotMove()
+    {
+        canMove = false;
+    }
+
+    public bool CanMove()
+    {
+        return canMove;
+    }
+
+    public void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Magnet")
+        {
+            // Magnet only affects characters wearing backpack
+            if (wearingBackpack)
+            {
+                // Applies force in the direction of the magnet, proportional to the distance to the magnet
+                float distance = transform.position.y - other.transform.position.y;
+
+                magnetForce = MagnetPlatform.GetForceFromDistance(distance);
+            }
+        }
     }
 }

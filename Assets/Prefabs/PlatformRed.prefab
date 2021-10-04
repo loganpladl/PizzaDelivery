@@ -55,6 +55,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlatformRed
       objectReference: {fileID: 0}
+    - target: {fileID: 7180977824963489507, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8027275564942156647, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8027275565941411669, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 8387497908326580914, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 

@@ -30,10 +30,15 @@ public class LevelTimers : MonoBehaviour
     {
         GameObject configObject = GameObject.FindGameObjectWithTag("Config");
 
-        if (levelTimerObject == null || configObject == null)
+        if (levelTimerObject == null)
         {
-            // Default 10 second duration if level timer object is not set or we cannot find config object.
+            // Default 10 second duration if level timer object is not set
             levelDuration = 10.0f;
+        }
+        else if (configObject == null)
+        {
+            // Default to the normal difficulty timer if we cannot find config object
+            levelDuration = levelTimerObject.GetTimeLimit(Config.DifficultyLevel.Normal);
         }
         else
         {

@@ -25,6 +25,8 @@ public class LevelState : MonoBehaviour
     GameObject knockPromptUI;
     [SerializeField]
     GameObject pickupPromptUI;
+    [SerializeField]
+    GameObject cantDeliverPromptUI;
 
     [SerializeField]
     GameObject pizzaDroppedUI;
@@ -65,6 +67,10 @@ public class LevelState : MonoBehaviour
 
     [SerializeField]
     LevelTimers levelTimers;
+
+    // Reset Unity's random seed to this number every loop
+    [SerializeField]
+    int initialRandomSeed;
 
     private void Awake()
     {
@@ -287,6 +293,8 @@ public class LevelState : MonoBehaviour
         loopStarted = true;
         levelTimers.StartTicking();
 
+        Random.InitState(initialRandomSeed);
+
         Time.timeScale = 1f;
     }
 
@@ -405,5 +413,15 @@ public class LevelState : MonoBehaviour
         pizzaDroppedUI.SetActive(true);
         yield return new WaitForSeconds(1.0f);
         pizzaDroppedUI.SetActive(false);
+    }
+
+    public void DisplayCantDeliverPrompt()
+    {
+        cantDeliverPromptUI.SetActive(true);
+    }
+
+    public void HideCantDeliverPrompt()
+    {
+        cantDeliverPromptUI.SetActive(false);
     }
 }

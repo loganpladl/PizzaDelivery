@@ -66,6 +66,9 @@ public class Character : MonoBehaviour
     Backpack currentBackpack;
     MeshRenderer currentBackpackMesh;
 
+    [SerializeField] float hangingTimeLimit = .25f;
+    float hangingTimer;
+
     private void Awake()
     {
         movementComponent = GetComponent<PlayerMovement>();
@@ -95,7 +98,7 @@ public class Character : MonoBehaviour
 
         currentBackpack = initialBackpack;
 
-
+        hangingTimer = hangingTimeLimit;
     }
 
     // Update is called once per frame
@@ -127,7 +130,38 @@ public class Character : MonoBehaviour
     {
         if (movementComponent.IsHanging() && wearingBackpack)
         {
-            DropBackpack();
+            hangingTimer -= Time.fixedDeltaTime;
+
+            // Disallow movement while hanging
+            if (movementComponent.CanMove())
+            {
+                movementComponent.SetCannotMove();
+            }
+
+            if (mouseLook.CanLook())
+            {
+                mouseLook.SetCannotLook();
+            }
+
+            // Only drop the backpack after hanging for hangingTimeLimit seconds. Provides some leniency to prevent unwanted drops.
+            if (hangingTimer <= 0)
+            {
+                DropBackpack();
+            }
+        }
+        else {
+            hangingTimer = hangingTimeLimit;
+
+            // Reallow movement now that the character no longer hanging
+            if (!movementComponent.CanMove())
+            {
+                movementComponent.SetCanMove();
+            }
+
+            if (!mouseLook.CanLook())
+            {
+                mouseLook.SetCanLook();
+            }
         }
     }
 
@@ -206,7 +240,7 @@ public class Character : MonoBehaviour
         }
         */
 
-        PickupBackpack(initialBackpack);
+        //PickupBackpack(initialBackpack);
     }
 
     void RewindStep(float progress, TimePoint timePoint)
@@ -254,6 +288,8 @@ public class Character : MonoBehaviour
         rigidbodyComponent.position = initialRigidbodyPosition;
         rigidbodyComponent.rotation = initialRigidbodyRotation;
         rigidbodyComponent.velocity = Vector3.zero;
+
+        PickupBackpack(initialBackpack);
     }
 
     // Disabled at the end of each loop

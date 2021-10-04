@@ -15,6 +15,9 @@ public class Backpack : MonoBehaviour
     [SerializeField]
     MeshRenderer meshRenderer;
 
+    // Magnet force to apply next fixed update
+    float magnetForce = 0;
+
     //int initialLayer;
 
     // TODO: Make dropped backpacks that are on top of another player's backpack preserve momentum of that player, just like players do 
@@ -23,11 +26,39 @@ public class Backpack : MonoBehaviour
     {
         rewindTarget.CreateNewTimePoint += CreateNewTimePoint;
         rewindTarget.Rewinding += RewindStep;
+        rewindTarget.OnRewindStart += StartRewind;
         //rb = GetComponent<Rigidbody>();
 
 
 
         //initialLayer = this.gameObject.layer;
+    }
+
+    private void FixedUpdate()
+    {
+        if (!beingWorn && rb != null)
+        {
+            // Add magnet force
+            Vector3 magnetVector = new Vector3(0, -magnetForce * rb.mass, 0);
+            rb.AddForce(magnetVector * Time.fixedDeltaTime, ForceMode.VelocityChange);
+
+            magnetForce = 0;
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Magnet")
+        {
+            // Magnet only affects characters wearing backpack
+            if (!beingWorn)
+            {
+                // Applies force in the direction of the magnet, proportional to the distance to the magnet
+                float distance = transform.position.y - other.transform.position.y;
+
+                magnetForce = MagnetPlatform.GetForceFromDistance(distance);
+            }
+        }
     }
 
     TimePoint CreateNewTimePoint()
@@ -123,7 +154,7 @@ public class Backpack : MonoBehaviour
     void CreateRigidbody()
     {
         rb = gameObject.AddComponent<Rigidbody>();
-        rb.mass = 10.0f;
+        rb.mass = 2.5f;
         /*
         rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ
             | RigidbodyConstraints.FreezeRotation;
@@ -133,5 +164,13 @@ public class Backpack : MonoBehaviour
     void DestroyRigidbody()
     {
         Destroy(rb);
+    }
+
+    void StartRewind()
+    {
+        if (rb)
+        {
+            Destroy(rb);
+        }
     }
 }
