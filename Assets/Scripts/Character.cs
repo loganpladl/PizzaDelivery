@@ -220,8 +220,6 @@ public class Character : MonoBehaviour
         }
 
         mouseLook.SetWearingBackpack();
-
-        PlayBackpackPickupSound();
     }
 
 
@@ -389,6 +387,7 @@ public class Character : MonoBehaviour
     public void TryBackpackPickup(Backpack backpack)
     {
         PickupBackpack(backpack);
+        PlayBackpackPickupSound(); // Play sound here instead of PickupBackpack() for now since I'm calling PickupBackpack on round start and don't want the sound to play then
     }
 
     public void PlayBackpackDropSound()

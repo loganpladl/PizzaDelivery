@@ -260,6 +260,7 @@ public class LevelState : MonoBehaviour
         pauseIcon.SetActive(false);
 
         levelTimers.UpdateRewindFrac();
+        levelTimers.SetEarlyRewindTimer();
 
         rewindController.StartRewind();
 
@@ -374,7 +375,7 @@ public class LevelState : MonoBehaviour
     // Rewind early if the player presses Q or falls out of bounds
     public void EarlyRewind()
     {
-        levelTimers.SetEarlyRewindTimer();
+        //levelTimers.SetEarlyRewindTimer();
         StartCoroutine(LoopEnd());
     }
 
