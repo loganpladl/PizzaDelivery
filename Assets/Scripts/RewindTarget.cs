@@ -15,6 +15,9 @@ public class RewindTarget : MonoBehaviour
 
     float rewindTimer = 0;
 
+    float rewindStartFrac = 0;
+    float currentRewindDuration;
+
     // Always revert to initial point at the end to ensure consistency
     TimePoint initialPoint;
 
@@ -71,18 +74,21 @@ public class RewindTarget : MonoBehaviour
     public void SetRewindParameters(int totalSteps, float rewindDuration)
     {
         this.totalSteps = totalSteps;
+        // TODO: not using maxRewindDuration
         this.maxRewindDuration = rewindDuration;
 
         timePoints = new TimePoint[totalSteps];
     }
 
-    public void StartRewind(float rewindDuration)
+    public void StartRewind(float rewindDuration, float rewindStartFrac)
     {
         
         rewinding = true;
 
-        rewindTimer = maxRewindDuration - rewindDuration;
+        rewindTimer = 0;
+        currentRewindDuration = rewindDuration;
 
+        this.rewindStartFrac = rewindStartFrac;
         
         if (OnRewindStart != null)
         {
@@ -111,21 +117,23 @@ public class RewindTarget : MonoBehaviour
 
     private void RewindStep()
     {
-        float frac = 1 - (rewindTimer / maxRewindDuration);
+        float frac = 1 - (rewindTimer / currentRewindDuration);
         // Safety clamp for frac that shouldnt be necessary but just in case
         frac = Mathf.Clamp(frac, 0, 1);
 
         // TODO: Subtracting 1 to fix off by one error when rewinding. Should look for a better solution.
-        currentStep = (int)((totalSteps) * frac) - 1;
+        //currentStep = (int)(totalSteps * frac) - 1;
+        currentStep = (int) (totalSteps * rewindStartFrac * frac) - 1;
 
         // TODO: is there a better way to avoid these index out of bounds errors?
         if (currentStep >= totalSteps) currentStep = totalSteps - 1;
         if (currentStep < 0) currentStep = 0;
 
-
-        
-
         TimePoint timePoint = timePoints[currentStep];
+        if (timePoint == null)
+        {
+            return;
+        }
 
         transform.position = timePoint.position;
         transform.rotation = timePoint.rotation;

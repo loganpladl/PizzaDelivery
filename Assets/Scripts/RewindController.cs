@@ -30,24 +30,12 @@ public class RewindController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
-
         totalSteps = (int)(levelTimers.LevelDuration * (1 / Time.fixedDeltaTime));
 
-        //rewindTargets = new List<RewindTarget>();
-
         rewindTargets = new List<RewindTarget>(GameObject.FindObjectsOfType<RewindTarget>());
-
-        /*
-        foreach (Character c in characters)
-        {
-            rewindTargets.Add(c.gameObject.GetComponent<RewindTarget>());
-        }
-        */
-
         foreach (RewindTarget rt in rewindTargets)
         {
-            rt.SetRewindParameters(totalSteps, levelTimers.LevelDuration / levelTimers.RewindSpeed);
+            rt.SetRewindParameters(totalSteps, levelTimers.RewindDuration);
         }
     }
 
@@ -59,9 +47,11 @@ public class RewindController : MonoBehaviour
 
         rewinding = true;
 
+        levelTimers.UpdateRewindFrac();
+
         foreach (RewindTarget rt in rewindTargets)
         {
-            rt.StartRewind(levelTimers.RewindTimer);
+            rt.StartRewind(levelTimers.RewindTimer, levelTimers.RewindStartFrac);
         }
         levelTimers.ResetLevelTimer();
         levelTimers.SetRewinding(true);

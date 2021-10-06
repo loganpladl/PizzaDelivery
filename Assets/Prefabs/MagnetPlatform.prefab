@@ -90,6 +90,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Platform (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 7180977824963489507, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8027275564942156647, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8027275565941411669, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387497908326580914, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 0ad2773d1b62cef4782c0f5f91e4ec36, type: 3}
+    - target: {fileID: 8387497909745348224, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 0ad2773d1b62cef4782c0f5f91e4ec36, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4cb340c53c4814549beb293e05dc0f0e, type: 3}
 --- !u!4 &3267147586845480639 stripped
@@ -148,9 +168,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888274, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 044298812d412124187d74907e7bca51, type: 2}
     - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
       propertyPath: m_Name
       value: Magnet
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
@@ -210,9 +238,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888274, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 044298812d412124187d74907e7bca51, type: 2}
     - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
       propertyPath: m_Name
       value: Magnet (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
@@ -272,9 +308,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888274, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 044298812d412124187d74907e7bca51, type: 2}
     - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
       propertyPath: m_Name
       value: Magnet (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
@@ -334,9 +378,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888274, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 044298812d412124187d74907e7bca51, type: 2}
     - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
       propertyPath: m_Name
       value: Magnet (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119202614959888278, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1920400e7be3a2943955a5a560011e2f, type: 3}

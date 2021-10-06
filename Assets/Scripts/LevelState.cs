@@ -258,6 +258,9 @@ public class LevelState : MonoBehaviour
         Time.timeScale = 1f;
 
         pauseIcon.SetActive(false);
+
+        levelTimers.UpdateRewindFrac();
+
         rewindController.StartRewind();
 
         loopStarted = false;

@@ -2885,6 +2885,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4758372278653319435, guid: ff248523497a410408a50351b8de92b7, type: 3}
+      propertyPath: levelTimerObject
+      value: 
+      objectReference: {fileID: 11400000, guid: 0a7f3d18866022b4c9965cf41719e47f, type: 2}
     - target: {fileID: 8709569545338382524, guid: ff248523497a410408a50351b8de92b7, type: 3}
       propertyPath: rewindSpeed
       value: 4

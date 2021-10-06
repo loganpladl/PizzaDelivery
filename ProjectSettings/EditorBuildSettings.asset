@@ -9,38 +9,35 @@ EditorBuildSettings:
     path: Assets/Scenes/Title.unity
     guid: b8228c780b28c1849af1542bdc2c6f85
   - enabled: 1
-    path: Assets/Scenes/Instructions.unity
-    guid: 0a7775100db460d4e9f2cdcdb844d010
-  - enabled: 1
-    path: Assets/Scenes/Old/Run Run Run.unity
-    guid: 402e043b63774894faed127208080530
-  - enabled: 1
-    path: Assets/Scenes/Old/Jumping.unity
-    guid: 1b0a47ebcda05cd44907e225f0f10900
-  - enabled: 1
-    path: Assets/Scenes/Crates.unity
-    guid: 4951450878f60414cb12870437b00ab9
+    path: Assets/Scenes/First Delivery.unity
+    guid: 9bfc1dc5f3ab05f428f14c3107354649
   - enabled: 1
     path: Assets/Scenes/Can't Reach.unity
     guid: b791e963133281b468599a968e3f5920
   - enabled: 1
-    path: Assets/Scenes/Leap of Faith.unity
+    path: Assets/Scenes/Leapfrog.unity
     guid: 6e1cac8fd35a2fa46aa470443b06e338
-  - enabled: 1
-    path: Assets/Scenes/Old/TwoUniverses-3.unity
-    guid: a93ee639a410a894185a58eb5adad285
   - enabled: 1
     path: Assets/Scenes/Branching Paths.unity
     guid: 32132bd23781dfb4ab3acc8b8f8773f6
   - enabled: 1
-    path: Assets/Scenes/Lucky Number Three.unity
-    guid: 8c942192a7aa6ca4eb01ebad2c39a1d6
-  - enabled: 1
     path: Assets/Scenes/Fork.unity
     guid: 14a8bc2a4e488124f9fd3a92b2bb4fd9
   - enabled: 1
-    path: Assets/Scenes/ThreeUniverses-3.unity
+    path: Assets/Scenes/Pizza Magnet.unity
+    guid: 47bfb9c862208164b83abd25e9a60a50
+  - enabled: 1
+    path: Assets/Scenes/Lucky Number Three.unity
+    guid: 8c942192a7aa6ca4eb01ebad2c39a1d6
+  - enabled: 1
+    path: Assets/Scenes/Bridge.unity
+    guid: 59929ae0c88140e4083412bf7a7da8ea
+  - enabled: 1
+    path: Assets/Scenes/Full Stack.unity
     guid: f9a124d5731a4414ab8ba6bf97666ef8
+  - enabled: 1
+    path: Assets/Scenes/Alternate.unity
+    guid: d7218a642ef2b1d428b097b30adc5c72
   - enabled: 1
     path: Assets/Scenes/End.unity
     guid: 0608fd39e8b35ba408c6fcb130cf3378

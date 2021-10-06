@@ -15,16 +15,26 @@ public class LevelTimers : MonoBehaviour
     public float RewindTimer { get; private set; }
 
     // How much faster is rewind compared to normal speed
-    [SerializeField]
-    float rewindSpeed = 3.0f;
+    //[SerializeField]
+    //float rewindSpeed = 3.0f;
 
-    public float RewindSpeed { get => rewindSpeed; }
+    //public float RewindSpeed { get => rewindSpeed; }
 
     [SerializeField]
     TextMeshProUGUI timerText;
 
     bool rewinding = false;
     bool ticking = false;
+
+    public float RewindStartFrac { get; private set; }
+
+
+    // Set amount of time it takes to rewind
+    [SerializeField]
+    float rewindDuration = 3;
+
+    public float RewindDuration { get => rewindDuration; }
+
 
     void Awake()
     {
@@ -51,6 +61,7 @@ public class LevelTimers : MonoBehaviour
     void Start()
     {
         ResetLevelTimer();
+        ResetRewindTimer();
         SetDefaultTimerText();
     }
 
@@ -86,7 +97,9 @@ public class LevelTimers : MonoBehaviour
         }
         else
         {
-            timerText.text = (levelDuration - RewindTimer * rewindSpeed).ToString("00.0");
+            float currentFrac = (rewindDuration - RewindTimer) / rewindDuration;
+            float rewindStartTime = levelDuration * (1 - RewindStartFrac);
+            timerText.text = (rewindStartTime + (levelDuration - rewindStartTime) * currentFrac).ToString("00.0");
         }
     }
 
@@ -117,7 +130,7 @@ public class LevelTimers : MonoBehaviour
 
     public void ResetRewindTimer()
     {
-        RewindTimer = levelDuration / rewindSpeed;
+        RewindTimer = rewindDuration;
     }
 
     public float GetTimeSinceLoopStart()
@@ -127,11 +140,25 @@ public class LevelTimers : MonoBehaviour
 
     public void SetEarlyRewindTimer()
     {
-        RewindTimer = (levelDuration - LevelTimer) / rewindSpeed;
+        // If it's been more than RewindDuration seconds since loop start, the rewind should take RewindDuration seconds
+        if (GetTimeSinceLoopStart() > RewindDuration)
+        {
+            RewindTimer = RewindDuration;
+        }
+        // If it's been less time than RewindDuration, rewind for less than that
+        else
+        {
+            RewindTimer = LevelDuration - LevelTimer;
+        }
     }
 
     public void SetRewinding(bool rewinding)
     {
         this.rewinding = rewinding;
+    }
+
+    public void UpdateRewindFrac()
+    {
+        RewindStartFrac = (levelDuration - LevelTimer) / levelDuration;
     }
 }

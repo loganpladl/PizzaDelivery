@@ -38,6 +38,15 @@ public class Character : MonoBehaviour
     [SerializeField]
     AudioClip landSound;
 
+    [SerializeField]
+    AudioSource backpackAudioSource;
+
+    [SerializeField]
+    AudioClip backpackDropClip;
+
+    [SerializeField]
+    AudioClip backpackPickupClip;
+
     bool enable = false;
 
     bool isActiveCharacter = false;
@@ -188,6 +197,8 @@ public class Character : MonoBehaviour
         }
 
         mouseLook.SetNotWearingBackpack();
+
+        PlayBackpackDropSound();
     }
 
     private void PickupBackpack(Backpack backpack)
@@ -209,6 +220,8 @@ public class Character : MonoBehaviour
         }
 
         mouseLook.SetWearingBackpack();
+
+        PlayBackpackPickupSound();
     }
 
 
@@ -376,5 +389,19 @@ public class Character : MonoBehaviour
     public void TryBackpackPickup(Backpack backpack)
     {
         PickupBackpack(backpack);
+    }
+
+    public void PlayBackpackDropSound()
+    {
+        backpackAudioSource.clip = backpackDropClip;
+        backpackAudioSource.volume = .7f;
+        backpackAudioSource.Play();
+    }
+
+    public void PlayBackpackPickupSound()
+    {
+        backpackAudioSource.clip = backpackPickupClip;
+        backpackAudioSource.volume = .7f;
+        backpackAudioSource.Play();
     }
 }

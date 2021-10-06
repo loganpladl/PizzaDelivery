@@ -65,6 +65,9 @@ public class UniverseShift : MonoBehaviour
         universeBackgrounds[numCharacters - 1].SetActive(true);
 
         shiftPostProcessVolume.weight = 0;
+
+        // Set blue universe objects by default
+        UniverseObject.SetBlueUniverse();
     }
 
     public void DisplayUniverseSelectionPrompt()
@@ -109,7 +112,6 @@ public class UniverseShift : MonoBehaviour
     {
         choosingUniverse = false;
 
-        
 
         // Skip universe transition if the character is already active
         if (currentUniverseIndex == index)
@@ -123,30 +125,52 @@ public class UniverseShift : MonoBehaviour
 
         currentUniverseIndex = index;
 
+        if (numCharacters == 2)
+        {
+            // Reset location symbol
+            blueUniverseHereDouble.SetActive(false);
+            redUniverseHereDouble.SetActive(false);
+
+            // Activate proper location symbol and set proper music
+            if (index == 0)
+            {
+                blueUniverseHereDouble.SetActive(true);
+                AudioManager.Instance.SetMusicBlueUniverse();
+            }
+            else if (index == 1)
+            {
+                redUniverseHereDouble.SetActive(true);
+                AudioManager.Instance.SetMusicRedUniverse();
+            }
+        }
+        else if (numCharacters == 3)
+        {
+            // Reset location symbol
+            blueUniverseHereTriple.SetActive(false);
+            redUniverseHereTriple.SetActive(false);
+            greenUniverseHereTriple.SetActive(false);
+
+            // Activate proper location symbol and set proper music
+            if (index == 0)
+            {
+                blueUniverseHereTriple.SetActive(true);
+                AudioManager.Instance.SetMusicBlueUniverse();
+            }
+            else if (index == 1)
+            {
+                redUniverseHereTriple.SetActive(true);
+                AudioManager.Instance.SetMusicRedUniverse();
+            }
+            else if (index == 2)
+            {
+                greenUniverseHereTriple.SetActive(true);
+                AudioManager.Instance.SetMusicGreenUniverse();
+            }
+        }
+        
         
 
-        // Reset location symbol
-        blueUniverseHereTriple.SetActive(false);
-        redUniverseHereTriple.SetActive(false);
-        greenUniverseHereTriple.SetActive(false);
-
-
-        // Activate proper location symboland set proper music
-        if (index == 0)
-        {
-            blueUniverseHereTriple.SetActive(true);
-            AudioManager.Instance.SetMusicBlueUniverse();
-        }
-        else if (index == 1)
-        {
-            redUniverseHereTriple.SetActive(true);
-            AudioManager.Instance.SetMusicRedUniverse();
-        }
-        else if (index == 2)
-        {
-            greenUniverseHereTriple.SetActive(true);
-            AudioManager.Instance.SetMusicGreenUniverse();
-        }
+        SetTimerBackground(currentUniverseIndex);
 
         StartCoroutine(UniverseShiftTransition());
     }
@@ -154,16 +178,22 @@ public class UniverseShift : MonoBehaviour
     public void BlueUniversePicked()
     {
         UniversePicked(0);
+
+        UniverseObject.SetBlueUniverse();
     }
 
     public void RedUniversePicked()
     {
         UniversePicked(1);
+
+        UniverseObject.SetRedUniverse();
     }
 
     public void GreenUniversePicked()
     {
         UniversePicked(2);
+
+        UniverseObject.SetGreenUniverse();
     }
 
     IEnumerator UniverseShiftTransition()
