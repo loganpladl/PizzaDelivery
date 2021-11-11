@@ -124,6 +124,12 @@ public class LevelState : MonoBehaviour
         }
         else if (levelStarted && !levelEnded)
         {
+            // Check for player reset
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+
             if (loopStarted && !rewinding && !loopEnded)
             {
                 if (levelTimers.IsLevelTimerOver())
@@ -143,12 +149,6 @@ public class LevelState : MonoBehaviour
                     {
                         Pause();
                     }
-                }
-
-                // Check for player reset
-                if (Input.GetKeyDown(KeyCode.R))
-                {
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                 }
 
                 // Check for player rewind
