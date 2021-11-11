@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ab391e9fbd71c54ab72cd7b68775d88, type: 3}
-  m_Name: 1-1
+  m_Name: Full Stack
   m_EditorClassIdentifier: 
-  timeLimitEasy: 15
-  timeLimitNormal: 12
-  timeLimitHard: 9
+  timeLimitEasy: 30
+  timeLimitNormal: 22
+  timeLimitHard: 15

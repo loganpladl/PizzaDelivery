@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ab391e9fbd71c54ab72cd7b68775d88, type: 3}
-  m_Name: Branching Paths
+  m_Name: First Delivery
   m_EditorClassIdentifier: 
-  timeLimitEasy: 38
-  timeLimitNormal: 24
-  timeLimitHard: 16
+  timeLimitEasy: 16
+  timeLimitNormal: 10
+  timeLimitHard: 5

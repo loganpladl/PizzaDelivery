@@ -140,8 +140,6 @@ public class LevelTimers : MonoBehaviour
 
     public void SetEarlyRewindTimer()
     {
-        RewindTimer = CalculateRewindDuration(LevelDuration - LevelTimer, 10);
-        /*
         // If it's been more than RewindDuration seconds since loop start, the rewind should take RewindDuration seconds
         if (GetTimeSinceLoopStart() > RewindDuration)
         {
@@ -152,12 +150,6 @@ public class LevelTimers : MonoBehaviour
         {
             RewindTimer = LevelDuration - LevelTimer;
         }
-        */
-    }
-
-    public float CalculateRewindDuration(float timeToRewind, float defaultDuration)
-    {
-        return defaultDuration * (timeToRewind / 50);
     }
 
     public void SetRewinding(bool rewinding)

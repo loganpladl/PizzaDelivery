@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Lucky Number Three
   m_EditorClassIdentifier: 
   timeLimitEasy: 25
-  timeLimitNormal: 20
-  timeLimitHard: 15
+  timeLimitNormal: 15
+  timeLimitHard: 10

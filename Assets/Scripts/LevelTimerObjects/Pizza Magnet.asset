@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Pizza Magnet
   m_EditorClassIdentifier: 
   timeLimitEasy: 30
-  timeLimitNormal: 25
-  timeLimitHard: 20
+  timeLimitNormal: 20
+  timeLimitHard: 13.5

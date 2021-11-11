@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ab391e9fbd71c54ab72cd7b68775d88, type: 3}
-  m_Name: Three High
+  m_Name: Can't Reach
   m_EditorClassIdentifier: 
-  timeLimitEasy: 30
-  timeLimitNormal: 25
-  timeLimitHard: 20
+  timeLimitEasy: 14
+  timeLimitNormal: 8
+  timeLimitHard: 4

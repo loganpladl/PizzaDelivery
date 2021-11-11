@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab391e9fbd71c54ab72cd7b68775d88, type: 3}
   m_Name: Bridge
   m_EditorClassIdentifier: 
-  timeLimitEasy: 30
-  timeLimitNormal: 25
+  timeLimitEasy: 35
+  timeLimitNormal: 26
   timeLimitHard: 20

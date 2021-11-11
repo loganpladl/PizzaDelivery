@@ -441,6 +441,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4758372278653319435, guid: ff248523497a410408a50351b8de92b7, type: 3}
+      propertyPath: levelTimerObject
+      value: 
+      objectReference: {fileID: 11400000, guid: 85d7f14f212fa8946b0680c330a8df87, type: 2}
     - target: {fileID: 8709569545338382524, guid: ff248523497a410408a50351b8de92b7, type: 3}
       propertyPath: characters.Array.data[0]
       value: 

@@ -99,7 +99,11 @@ public class Character : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
+        GameObject levelStateObject = GameObject.FindWithTag("LevelState");
+        if (levelStateObject)
+        {
+            levelState = levelStateObject.GetComponent<LevelState>();
+        }
 
         inAirTimer = secondsInAirForLandSound;
 

@@ -73,7 +73,11 @@ public class MouseLook : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        levelState = GameObject.FindGameObjectsWithTag("LevelState")[0].GetComponent<LevelState>();
+        GameObject levelStateObject = GameObject.FindWithTag("LevelState");
+        if (levelStateObject)
+        {
+            levelState = levelStateObject.GetComponent<LevelState>();
+        }
 
         vcam.transform.position = transform.position;
 
