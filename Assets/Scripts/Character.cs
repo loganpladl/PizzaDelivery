@@ -407,4 +407,14 @@ public class Character : MonoBehaviour
         backpackAudioSource.volume = .7f;
         backpackAudioSource.Play();
     }
+
+    public void DisableRendering()
+    {
+        characterMesh.enabled = false;
+    }
+
+    public void EnableRendering()
+    {
+        characterMesh.enabled = true;
+    }
 }

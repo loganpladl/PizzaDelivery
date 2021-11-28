@@ -10,6 +10,8 @@ public class InputManager : MonoBehaviour
     [SerializeField]
     float mouseAcceleration;
 
+    [SerializeField]
+    bool notRecording;
 
     // index into characters of active character
     int activeCharacterIndex = 0;
@@ -68,9 +70,11 @@ public class InputManager : MonoBehaviour
         }
 
         
-
-
-        currentFixedStep++;
+        // TODO: Encapsulate out recording logic instead of doing these if checks
+        if (!notRecording)
+        {
+            currentFixedStep++;
+        } 
     }
 
     private void TestReplayDivergence()
@@ -109,7 +113,7 @@ public class InputManager : MonoBehaviour
         Character activeCharacter = characters[activeCharacterIndex];
 
         // Determinism test
-        //recordedPositions[activeCharacter].Add(activeCharacter.GetComponent<Rigidbody>().position);
+        // recordedPositions[activeCharacter].Add(activeCharacter.GetComponent<Rigidbody>().position);
 
         while (commands[activeCharacter].Count > activeCharacterCommandIndex)
         {
@@ -123,7 +127,11 @@ public class InputManager : MonoBehaviour
             activeCharacterCommandIndex++;
         }
 
-        
+        if (!notRecording)
+        {
+            activeCharacterCommandIndex = 0;
+            commands[activeCharacter].Clear();
+        }
     }
 
     public void Init(Character[] characters)
