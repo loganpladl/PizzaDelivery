@@ -66,15 +66,14 @@ public class InputManager : MonoBehaviour
             Playback();
 
             // Uncomment to test replay divergence
-            //TestReplayDivergence();
+            // TestReplayDivergence();
         }
 
-        
         // TODO: Encapsulate out recording logic instead of doing these if checks
         if (!notRecording)
         {
             currentFixedStep++;
-        } 
+        }
     }
 
     private void TestReplayDivergence()
