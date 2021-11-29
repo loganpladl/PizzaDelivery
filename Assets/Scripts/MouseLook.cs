@@ -69,6 +69,14 @@ public class MouseLook : MonoBehaviour
     Vector3 initialLocalPosition;
     Quaternion initialLocalRotation;
 
+    float latestFixedUpdateTime;
+    float secondLatestFixedUpdateTime;
+
+    Quaternion previousCameraRotation;
+    Quaternion nextCameraRotation;
+    Vector3 previousCameraPosition;
+    Vector3 nextCameraPosition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -85,10 +93,18 @@ public class MouseLook : MonoBehaviour
 
         initialLocalPosition = transform.localPosition;
         initialLocalRotation = transform.localRotation;
+
+        latestFixedUpdateTime = Time.time;
+        secondLatestFixedUpdateTime = Time.time;
+
+        previousCameraRotation = transform.rotation;
+        nextCameraRotation = transform.rotation;
+        previousCameraPosition = transform.position;
+        nextCameraPosition = transform.position;
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         // Hacky way to avoid doing anything if the game is paused
         if (Time.timeScale == 0)
@@ -100,11 +116,21 @@ public class MouseLook : MonoBehaviour
         if (enable)
         {
             //vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
-            vcam.transform.position = transform.position * .15f + vcam.transform.position * .85f;
+
+            float t = (Time.time - latestFixedUpdateTime) / (latestFixedUpdateTime - secondLatestFixedUpdateTime);
+            if ((latestFixedUpdateTime - secondLatestFixedUpdateTime) == 0)
+            {
+                // fixes divide by zero TODO: Clean up
+                t = 1;
+            }
+
+            //vcam.transform.position = transform.position * .2f + vcam.transform.position * .8f;
+
+            vcam.transform.position = Vector3.Lerp(previousCameraPosition, nextCameraPosition, t);
 
             if (hangingSmoothTimer <= 0)
             {
-                vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, transform.rotation, rotationSmoothing * Time.deltaTime);
+                vcam.transform.rotation = Quaternion.Slerp(previousCameraRotation, nextCameraRotation, t);
             }
             else
             {
@@ -122,6 +148,9 @@ public class MouseLook : MonoBehaviour
 
     private void FixedUpdate()
     {
+        secondLatestFixedUpdateTime = latestFixedUpdateTime;
+        latestFixedUpdateTime = Time.time;
+
         if (canLook)
         {
             transform.position = targetTransform.transform.position;
@@ -177,6 +206,11 @@ public class MouseLook : MonoBehaviour
         }
 
         tryInteract = false;
+
+        previousCameraRotation = nextCameraRotation;
+        nextCameraRotation = transform.rotation;
+        previousCameraPosition = nextCameraPosition;
+        nextCameraPosition = transform.position;
     }
 
     public void UpdateLook(float xVelocity, float yVelocity)
