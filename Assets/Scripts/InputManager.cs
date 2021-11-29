@@ -126,7 +126,7 @@ public class InputManager : MonoBehaviour
             activeCharacterCommandIndex++;
         }
 
-        if (!notRecording)
+        if (notRecording)
         {
             activeCharacterCommandIndex = 0;
             commands[activeCharacter].Clear();
