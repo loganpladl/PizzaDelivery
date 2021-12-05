@@ -13,6 +13,7 @@ namespace CommandPattern
         }
         // Execute command
         public abstract void Execute();
+        public abstract void ImmediateExecute();
     }
 
     public class Movement : Command
@@ -28,6 +29,11 @@ namespace CommandPattern
         {
             character.UpdateMove(horizontal, vertical);
         }
+
+        public override void ImmediateExecute()
+        {
+
+        }
     }
 
     public class Look : Command
@@ -39,10 +45,16 @@ namespace CommandPattern
             
             this.xVelocity = xVelocity;
             this.yVelocity = yVelocity;
+            ImmediateExecute();
         }
         public override void Execute()
         {
             character.UpdateLook(xVelocity, yVelocity);
+        }
+
+        public override void ImmediateExecute()
+        {
+            character.UpdateLookRealtime(xVelocity, yVelocity);
         }
     }
 
@@ -57,6 +69,11 @@ namespace CommandPattern
         {
             character.TryJump();
         }
+
+        public override void ImmediateExecute()
+        {
+
+        }
     }
 
     public class Interact : Command
@@ -69,6 +86,10 @@ namespace CommandPattern
         public override void Execute()
         {
             character.TryInteract();
+        }
+        public override void ImmediateExecute()
+        {
+
         }
     }
 }

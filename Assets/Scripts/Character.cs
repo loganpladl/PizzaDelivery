@@ -274,6 +274,10 @@ public class Character : MonoBehaviour
         mouseLook.UpdateLook(mouseX, mouseY);
     }
 
+    public void UpdateLookRealtime(float mouseX, float mouseY)
+    {
+        mouseLook.UpdateLookRealtime(mouseX, mouseY);
+    }
     
 
     // Used by input manager when it runs out of commands to prevent continued movement/animations
