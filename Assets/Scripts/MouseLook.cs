@@ -222,6 +222,8 @@ public class MouseLook : MonoBehaviour
 
         transform.localPosition = initialLocalPosition;
         transform.localRotation = initialLocalRotation;
+        vcamHorizontal = 0;
+        vcamVertical = 0;
     }
 
     public void Disable()

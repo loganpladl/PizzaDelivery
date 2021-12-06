@@ -80,6 +80,10 @@ public class PlayerMovement : MonoBehaviour
     // Force from magnet to apply next FixedUpdate
     float magnetForce = 0;
 
+    [SerializeField] float jumpedOffDuration;
+    float jumpedOffTimer = 0;
+    bool jumpedOffOf;
+
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
@@ -416,5 +420,10 @@ public class PlayerMovement : MonoBehaviour
                 magnetForce = MagnetPlatform.GetForceFromDistance(distance);
             }
         }
+    }
+
+    public void JumpedOffOf()
+    {
+        jumpedOffOf = true;
     }
 }
