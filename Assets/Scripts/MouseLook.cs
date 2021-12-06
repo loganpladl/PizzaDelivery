@@ -6,11 +6,6 @@ using Cinemachine;
 public class MouseLook : MonoBehaviour
 {
     [SerializeField]
-    float mouseSensitivity;
-    [SerializeField]
-    float acceleration;
-
-    [SerializeField]
     Transform targetTransform;
 
     [SerializeField]
@@ -28,12 +23,6 @@ public class MouseLook : MonoBehaviour
     CinemachineVirtualCamera vcam;
 
     float CameraVerticalRotation = 0.0f;
-
-    [SerializeField]
-    float positionSmoothing = 1;
-
-    [SerializeField]
-    float rotationSmoothing = 1;
 
     bool enableRaycasting = true;
 
@@ -63,6 +52,8 @@ public class MouseLook : MonoBehaviour
     float hangingSmoothTimer = 0;
 
     [SerializeField] float hangingSmoothDivisor = 5.0f;
+
+    [SerializeField] float rotationSmoothing = 50f;
 
     Vector3 initialLocalPosition;
     Quaternion initialLocalRotation;
@@ -99,13 +90,6 @@ public class MouseLook : MonoBehaviour
 
         latestFixedUpdateTime = Time.time;
         secondLatestFixedUpdateTime = Time.time;
-
-        previousCameraRotation = transform.rotation;
-        nextCameraRotation = transform.rotation;
-        previousCameraPosition = transform.position;
-        nextCameraPosition = transform.position;
-
-
     }
 
     // Update is called once per frame
@@ -120,78 +104,46 @@ public class MouseLook : MonoBehaviour
         // Only smooth if enabled since otherwise we're rewinding and no smoothing is preferred
         if (enable)
         {
-            
-            //vcam.transform.position = Vector3.MoveTowards(vcam.transform.position, transform.position, positionSmoothing * Time.deltaTime);
-
-            float t = (Time.time - latestFixedUpdateTime) / (latestFixedUpdateTime - secondLatestFixedUpdateTime);
-            
-            if ((latestFixedUpdateTime - secondLatestFixedUpdateTime) == 0)
-            {
-                // fixes divide by zero TODO: Clean up
-                t = 1;
-            }
-
-            //vcam.transform.position = transform.position * .2f + vcam.transform.position * .8f;
-
-            
-
-            vcam.transform.position = Vector3.Lerp(previousCameraPosition, nextCameraPosition, t);
+            InterpolateVcamPosition();
 
 
             //temp rotation
             if (canLook)
             {
-                //vcam.transform.position = targetTransform.transform.position;
-                //vcam.transform.rotation = targetTransform.transform.rotation;
-
                 vcamVertical = Mathf.Clamp(vcamVertical, -90.0f, 90.0f);
                 Vector3 euler = new Vector3(vcamVertical, vcamHorizontal, 0.0f);
-                //vcamHorizontal = 0;
-                //Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
-                //Vector3 newEuler = gameObject.transform.localEulerAngles + euler;
                 baseRealtimeCamera.transform.localRotation = Quaternion.Euler(euler);
 
                 vcam.transform.rotation = baseRealtimeCamera.transform.rotation;
             }
             else
             {
-                // TODO: Adapt hanging code from parts of FixedUpdate
-                Debug.Log(vcam.transform.rotation);
-                Debug.Log(baseRealtimeCamera.transform.rotation);
+                Vector3 euler = new Vector3(vcamVertical, vcamHorizontal, 0.0f);
+                baseRealtimeCamera.transform.localRotation = Quaternion.Euler(euler);
+
                 // Apply extra smoothing while hanging and briefly after, to mask camera snapping
                 vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, baseRealtimeCamera.transform.rotation, rotationSmoothing / hangingSmoothDivisor * Time.deltaTime);
                 hangingSmoothTimer -= Time.deltaTime;
-
-                // Reset 
-                vcamVertical = CameraVerticalRotation;
-                vcamHorizontal = transform.localRotation.eulerAngles.y;
             }
-
-            //vcam.transform.rotation = Quaternion.Slerp(previousCameraRotation, nextCameraRotation, t);
-            
-
-            if (hangingSmoothTimer <= 0)
-            {
-                
-            }
-            /*
-            else
-            {
-                // Apply extra smoothing while hanging and briefly after, to mask camera snapping
-                vcam.transform.rotation = Quaternion.Slerp(vcam.transform.rotation, baseRealtimeCamera.transform.rotation, rotationSmoothing / hangingSmoothDivisor  * Time.deltaTime);
-                hangingSmoothTimer -= Time.deltaTime;
-
-                // Reset 
-                vcamVertical = CameraVerticalRotation;
-                vcamHorizontal = transform.localRotation.eulerAngles.y;
-            }
-            */
         }
         else
         {
             vcam.transform.position = transform.position;
             vcam.transform.rotation = transform.rotation;
         }
+    }
+
+    private void InterpolateVcamPosition()
+    {
+        float t = (Time.time - latestFixedUpdateTime) / (latestFixedUpdateTime - secondLatestFixedUpdateTime);
+
+        if ((latestFixedUpdateTime - secondLatestFixedUpdateTime) == 0)
+        {
+            // fixes divide by zero TODO: Clean up
+            t = 1;
+        }
+
+        vcam.transform.position = Vector3.Lerp(previousCameraPosition, nextCameraPosition, t);
     }
 
     private void FixedUpdate()
@@ -206,27 +158,10 @@ public class MouseLook : MonoBehaviour
 
             CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
             Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
-            //Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
+
             Vector3 newEuler = gameObject.transform.localEulerAngles + eulerVertical;
             gameObject.transform.localRotation = Quaternion.Euler(newEuler);
         }
-
-        // TODO: Get rid of copy paste
-        // Tighter vertical view angle if hanging
-        else
-        {
-            transform.position = targetTransform.transform.position;
-            transform.rotation = targetTransform.transform.rotation;
-
-            CameraVerticalRotation = Mathf.Clamp(CameraVerticalRotation, -90.0f, 90.0f);
-            CameraVerticalRotation /= hangingViewAngleDivisor;
-
-            Vector3 eulerVertical = new Vector3(CameraVerticalRotation, 0.0f, 0.0f);
-            //Vector3 newEuler = gameObject.transform.rotation.eulerAngles + eulerVertical;
-            Vector3 newEuler = gameObject.transform.localEulerAngles + eulerVertical;
-            gameObject.transform.localRotation = Quaternion.Euler(newEuler);
-        }
-
 
         if (enable)
         {
@@ -236,17 +171,6 @@ public class MouseLook : MonoBehaviour
             if (canLook)
             {
                 PlayerRigidbody.MoveRotation(PlayerRigidbody.rotation * Quaternion.Euler(eulerHorizontal));
-            }
-            else
-            {
-                
-                hangingHorizontalCameraRotation += eulerHorizontal.y;
-                hangingHorizontalCameraRotation /= hangingViewAngleDivisor;
-                eulerHorizontal = new Vector3(0.0f, hangingHorizontalCameraRotation, 0.0f);
-
-                Vector3 newEuler = gameObject.transform.localEulerAngles + eulerHorizontal;
-                gameObject.transform.localRotation = Quaternion.Euler(newEuler);
-                
             }
 
             if (enableRaycasting)
@@ -265,15 +189,21 @@ public class MouseLook : MonoBehaviour
 
     public void UpdateLook(float xVelocity, float yVelocity)
     {
-        // Negate vertical input since positive movement is normally downward
-        CameraVerticalRotation -= yVelocity;
-        CameraHorizontalRotation += xVelocity;
+        if (canLook)
+        {
+            // Negate vertical input since positive movement is normally downward
+            CameraVerticalRotation -= yVelocity;
+            CameraHorizontalRotation += xVelocity;
+        }
     }
 
     public void UpdateLookRealtime(float xVelocity, float yVelocity)
     {
-        vcamVertical -= yVelocity;
-        vcamHorizontal += xVelocity;
+        if (canLook)
+        {
+            vcamVertical -= yVelocity;
+            vcamHorizontal += xVelocity;
+        }
     }
 
     public float GetVerticalRotation()
@@ -427,19 +357,26 @@ public class MouseLook : MonoBehaviour
 
     public void SetCanLook()
     {
-        hangingSmoothTimer = hangingSmoothDuration;
+        //hangingSmoothTimer = hangingSmoothDuration;
 
-        transform.localRotation = Quaternion.Euler(new Vector3(transform.localEulerAngles.x, startHangingLocalRotation.y, 0));
-        baseRealtimeCamera.transform.localRotation = Quaternion.Euler(new Vector3(transform.localEulerAngles.x, startHangingLocalRotation.y, 0));
+        //transform.localRotation = Quaternion.Euler(new Vector3(transform.localEulerAngles.x, startHangingLocalRotation.y, 0));
+        //baseRealtimeCamera.transform.localRotation = Quaternion.Euler(new Vector3(transform.localEulerAngles.x, startHangingLocalRotation.y, 0));
         canLook = true;
 
-        hangingHorizontalCameraRotation = 0;
+        //hangingHorizontalCameraRotation = 0;
     }
 
     public void SetCannotLook()
     {
+        transform.position = targetTransform.transform.position;
+        transform.rotation = targetTransform.transform.rotation;
+
         startHangingLocalRotation = transform.localRotation;
-        baseRealtimeCamera.transform.localRotation = startHangingLocalRotation;
+        //baseRealtimeCamera.transform.localRotation = startHangingLocalRotation;
+        CameraHorizontalRotation = 0;
+        vcamVertical = 0;
+        CameraVerticalRotation = 0;
+        vcamHorizontal = transform.localRotation.eulerAngles.y;
 
         canLook = false;
     }

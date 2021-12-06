@@ -43,8 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d0b6d1da8f8574ab37b5da5b610ea6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 1
-  acceleration: 100
   targetTransform: {fileID: 0}
   PlayerRigidbody: {fileID: 0}
   rayCastLength: 2
@@ -52,11 +50,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   vcam: {fileID: 4898587746920144462}
-  positionSmoothing: 10
-  rotationSmoothing: 75
   hangingViewAngleDivisor: 1.125
   hangingSmoothDuration: 0.1
   hangingSmoothDivisor: 20
+  rotationSmoothing: 300
   baseRealtimeCamera: {fileID: 7144203362116940871}
 --- !u!1 &4898587747510887154
 GameObject:
